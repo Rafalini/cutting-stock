@@ -1,0 +1,37 @@
+Badania rozpoczęliśmy od przetestowania algorytmu pakowania do pojemników. Wygenerowania 100 testowych przypadków, w których ilość zamawianych elementów zaczynała się od kilkunastu sztuk, a kończyła się na około 300. Przypadki były generowane losowo, przyjęliśmy tutaj że pręt bazowy ma długość 20 jednostek (przykładowo metrów), a maksymalne wartości relaksacji nie przekraczają 15\%. Pierwsze co sprawdziliśmy to jak daleko od optimum wypadają nasze algorytmy, wykres \ref{fig:optimum} przedstawia różnicę w ilości prętów bazowych względem rozwiązania optymalnego, wartości ujemne oznaczają że algorytm poradził sobie w danym przypadku testowym słabiej i nie znalazł optimum.
+
+\begin{figure}[ht]
+    \includegraphics[width=0.9\linewidth]{images/optimum.png}
+    \caption{Jakość szukania optimum}
+    \label{fig:optimum}
+\end{figure}
+
+ Przedmiotem dalszych badań był czas wykonywania algorytmów.
+
+\begin{figure}[ht]
+    \includegraphics[width=0.9\linewidth]{images/effi.png}
+    \caption{Czas wykonywania algorytmu BinPack}
+    \label{fig:effi}
+\end{figure}
+
+Na sam koniec porównaniu poddaliśmy algorytm BinPack z programem napisanym w AMPL, stosującym metodę generacji kolumn. Tym razem przypadków było tylko 10. Rozmiary zamówień wachały się pomiędzy 10000 a 100000, więc użycie algorytmu szukającego optimum globalne nie było możliwe.
+
+\begin{figure}[ht]
+    \includegraphics[width=0.9\linewidth]{images/3.png}
+    \caption{Znalezione rozwiązania}
+    \label{fig:optimum2}
+\end{figure}
+
+\begin{figure}[ht]
+    \includegraphics[width=0.9\linewidth]{images/2.png}
+    \caption{Różnica (BinPack - AMPL) w ilości wykorzystanych prętów}
+    \label{fig:optimumDiff}
+\end{figure}
+
+\begin{figure}[ht]
+    \includegraphics[width=0.9\linewidth]{images/1.png}
+    \caption{Porównanie czasu wykonywania BinPack i AMPL}
+    \label{fig:time}
+\end{figure}
+
+Na wykresach \ref{fig:optimum2} i \ref{fig:optimumDiff} zaobserwować można różnice jakości znajdowanego przez algorytmy rozwiązania, zaś na wykresie \ref{fig:time} czas ich wykonywania.

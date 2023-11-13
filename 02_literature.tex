@@ -1,0 +1,60 @@
+Omawiany problem w formie bazowej znany jest w literaturze od kilkudziesięciu lat. W pracy \cite{linear-programming} zagadnienie jest wyrażone jako problem programowania liniowego,
+jednak autorzy zwracają uwagę na problem bardzo szybko rosnącej ilości zmiennych w przedstawieniu tego problemu w sposób kombinatoryczny i proponują rozwiązywanie go metodą generacji kolumn. W ogólności problem jest definiowany następująco. 
+
+\subsubsection*{Dane}
+
+\begin{align*}
+J & : \text{Zbiór dostępnych cięć dla danej długość bazowej} \\
+I & : \text{Zbiór dostępnych fragmentów bazowych.} \\
+d_j & : \text{Wymagana ilość kawałków danej długości } j. \\
+L & : \text{Długość pręta bazowego } \\
+x_{ij} & : \text{Liczba kawałków rodzaju } j \text{ uzyskanych z rolki } i.
+\end{align*}
+
+
+\subsubsection*{Funkcja celu}
+
+\begin{equation}
+\text{Zadnie minimalizacji } Z = \sum_{i}\sum_{j} \left(l_i - \sum_{i} x_{ij} \cdot d_j \right)
+\end{equation}
+
+\subsubsection*{Ograniczenia}
+\hfill\\
+\text{Każdy pręt musi zostać zużyty:} 
+\begin{equation}
+\sum_{j} x_{ij} \cdot d_j \geq L \text{ for all } i
+\end{equation}
+\text{Liczba wymaganych fragmentów musi się pokrywać z wyciętymi}
+\begin{equation}
+\sum_{i} x_{ij} = d_j \text{ for all } j
+\end{equation}
+\text{Oraz warunek nie ujemności zmiennych}
+\begin{equation}
+x_{ij} \geq 0 \text{ for all } i, j
+\end{equation}
+
+Autorzy proponują jednak własną metodę - metodę generacji kolumn. Polega ona na stopniowym rozwiązywaniu problemu z coraz to większą liczbą zmiennych (ponieważ zapisanie całego zadania wymagałoby bardzo dużej ich ilości). Chodzi o iteracyjne rozwiązywanie coraz większego problemu. Algorytm przedstawia się następująco
+
+\begin{enumerate}
+\item Przedstaw problem główny jako minimalizację liczby prętów bazowych i podproblem jako minimalizację kosztów (zużycia materiału) ˙
+\item Inkrementuj liczbę wzorców
+\item Rozwiąż problem główny i podproblem
+\item Jeżeli rozwiązanie pogorszyło si˛e koniec algorytmu, ˙
+w przeciwnym wypadku wróć do punktu 2
+\end{enumerate}
+
+Takie rozwiązanie charakteryzuje się wysoką efektywnością czasową, eliminując konieczność pełnego przeszukiwania przestrzeni rozwiązań. Niemniej jednak, istnieje istotna wada tego podejścia, wynikająca z operowania na liczbach rzeczywistych, co implikuje, że wynik końcowy, będący liczbą rzeczywistą, wymaga przybliżenia. Dodatkowym ograniczeniem tego modelu jest nieodzowna konieczność wyrażania długości w jednostkach całkowitych. W związku z tym, aby uwzględnić pręty o niecałkowitych długościach, takie jak 7,5 m, konieczne jest przeskalowanie wszystkich długości do jednostek bardziej precyzyjnych, takich jak milimetry czy centymetry. Z punktu widzenia niniejszej pracy, model ten stanowi solidny punkt wyjścia, pozwalając na potencjalne rozwinięcie go poprzez dodanie dodatkowych ograniczeń dotyczących relaksacji, co może przynieść pożądane efekty, zgodne z celem badawczym tej pracy.
+
+Kolejnym godnym uwagi badaniem, które analizuje aspekty problematyki cięcia materiałów, jest praca poświęcona minimalizacji wzorców cięcia \cite{patterns-reduction}. Autorzy tego opracowania identyfikują istotny fakt, że dla każdego zamówienia możliwe jest wygenerowanie różnorodnych wzorców cięcia, co oznacza różne kombinacje długości prętów bazowych potrzebnych do wycięcia zamówionych elementów. Teoretycznie istnieje ogromna liczba potencjalnych kombinacji, jednakże w praktyce można przypuszczać, że wiele z tych kombinacji jest nieefektywnych pod kątem minimalizacji marnotrawstwa materiału.
+
+\begin{enumerate}
+  \item Rozwiązujemy problem poboczny - wyznaczamy pewną ilość wzorców do cięcia
+  \item Poszukujemy optymalnego rozwiązania dla zadanych wzorców - ilości cięć według każdego wzorca - dla którego osiągamy najmniejszy koszt
+  \item jeżeli rozwiązanie nie poprawiło się, kończymy algorytm, w przeciwnym wypadku zwiększamy ilość wzorców cięcia i wracamy do punktu 1.
+\end{enumerate}
+
+Autorzy proponują zastosowanie modelu sztucznej sieci neuronowej, który ma na celu przewidywanie lub, dokładniej, klasyfikację wzorców cięcia na podstawie ich efektywności i przydatności. Dopiero po ograniczeniu zestawu wszystkich możliwych wzorców do tych, które są prawdopodobnie bardziej efektywne, przystępuje się do dalszego przetwarzania. Ta praca stanowi istotne uzupełnienie i propozycję przyspieszenia procesu rozwiązywania problemu, który został wcześniej omówiony w badaniach wykorzystujących programowanie liniowe \cite{linear-programming}.
+
+Do problemu minimalizacji ilości zamówionych prętów bazowych nieco inaczej podchodzą autorzy pracy \cite{structural-tubes}, w której skupiają się na takim wycinaniu elementów, aby odpadki nadawały się do dalszego przetworzenia. Jednak to rozwiązanie jest w głównej mierze oparte również o zagadnienie programowania liniowego i zostało opracowane pod kątem elementów do konstrukcji lotniczych, w których tolerancja na odchylenia długości jest bardzo mała, jeśli jest.
+
+Do testowania i porównywania różnych rozwiązań skorzystaliśmy z algorytmu opisanego w pracy \cite{problem-generator} do generowania testowych przypadków.

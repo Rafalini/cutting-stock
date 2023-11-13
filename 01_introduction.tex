@@ -1,0 +1,33 @@
+W dobie wszechobecnej cyfryzacji, przemysłu 4.0 [lit], gdzie podstawę stanowi informacja coraz większa waga przykładana jest do oszczędności, głównie na płaszczyźnie optymalizacji procesów wytwórczych. Problem cięcia stali to problem optymalnego wykorzystania materiału do realizacji zadania produkcyjnego - celem jest minimalizacja kosztów realizacji zamówienia. Problem ten należy do klasy zagadnień badan operacyjnych [lit] i wykorzystania zasobów - np. problem cięcia materiałów magazynowych o standardowej wielkości, takich jak rolki papierowe lub blachy, na kawałki o określonych rozmiarach, jednocześnie minimalizując zmarnowane materiały. Podobnym problem jest pakowanie paczek na palecie [lit], gdzie celem jest wykorzystanie jak największej przestrzeni i zarazem minimalizacja pustego miejsca. Są to problemy spotykane w aplikacjach przemysłowych, które mogą być sformułowane w postaci zadania optymalizacji matematycznej. Zadania takie posiadają dużą złożoność obliczeniową (są to problemy klasy NP zupełne), w ogólności klasyfikowane są jako problem plecakowy i są bardzo dobrze opisane w literaturze [lit].
+
+Nie wszystkie problemy przemysłowe w pełni wpisują się w czystą formułę problemu plecakowego. W niniejszym artykule autorzy koncentrują się na problemie przygotowania konstrukcji zbrojenia wykorzystywanej do budowy domów i innych obiektów architektonicznych. Zbrojenie wykonywane jest z prętów o różnych długościach i średnicach specyfikowanych w projekcie konstrukcyjnym. Pręty przygotowywane są z 12 metrowych prętów, które cięte są na krótsze wymagane odcinki. Różnica względem bazowego problemu plecakowego polega na tym, że:
+\begin{itemize}
+\item elementy mogą być wykonane z pewną tolerancją - czyli ograniczenia nie są sztywne;
+\item projekt definiuje wszystkie elementy, jednak zlecenie ze względów logistycznych jak i magazynowych zazwyczaj realizowane jest etapowo - powstaje problem, które elementy z późniejszych etapów należy zrealizować w ramach niniejszego etapu, żeby wykorzystanie materiału było najefektywniejsze przy najmniejszym stanie magazynowym. 
+\end{itemize}
+
+Tak sformułowany problem ma zastosowanie w rzeczywistych projektach, gdzie koszty materiałów, koszty obsługi inwestycji, logistyki i magazynowania przekładają się na koszty całej inwestycji. Problem może być rozpatrywany w wielu aspektach. W ramach niniejszej pracy autorzy skupiają się na pierwszej z wymienionych modyfikacji polegającej na dopuszczeniu relaksacji wymiarów prętów. 
+
+W ogólności przedmiotem badania są algorytmy wyznaczania sposobu podziału bazowych prętów na krótsze odcinki. Autorzy zakładają że pręty bazowe są produkowane w stałym rozmiarze (12m) i wymagają podzielenia na określoną liczbę odcinków o mniejszej długości według projektu. Odcinków, na które podzielony zostanie 12 metrowy pręt bazowy może być wiele (wiele o danej długości, jak i wiele o różnych długości) - ogólny zamysł ilustruje rysunek\ref{fig:concept}. 
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/concept.png}
+    \caption{Przykładowy podział materiału}
+    \label{fig:concept}
+\end{figure}
+
+Na rysunku zaprezentowano, że do realizacji zamówienia składającego się z:
+\begin{itemize}
+\item 3 prętów 6 metrowych;
+\item 3 prętów 2 metrowych;
+\item 3 prętów 4 metrowych
+\end{itemize}
+potrzebne jest użycie 3 prętów 12 metrowych.
+
+Badana wersja problemu rozszerzona została o możliwość relaksacji ograniczeń, czyli złagodzenia wymagań co do wymiarów. W celu wyjaśnienia, rozpatrzmy przypadek budowy domu, do którego potrzeba ściśle określonej liczby prętów o różnych długościach. Jednak nie wszystkie muszą mieć dokładnie taką długość jaką zakłada projekt - pręty poprzeczne używane do zbrojenia ławy fundamentowej czy schodów mogą być 3\% krótsze. Pręty wchodzące w konstrukcje nadproży czy słupów konstrukcyjnych zazwyczaj mogą być kilka centymetrów krótsze lub dłuższe. Czyli istnieją elementy, które mają zdefiniowany wymiar nominalny ale dopuszczalna jest tolerancja. Fakt ten pozwala w pewnych przypadkach osiągnąć oszczędności materiałowe praktycznie bez pogorszenie parametrów wytrzymałościowych konstrukcji. Modyfikacja ta wpływa na postać zadania do rozwiązania i jest tematem niniejszego artykułu.
+
+
+
+
+
