@@ -1,45 +1,87 @@
-Wykorzystując język AMPL przygotowana została pierwsza implementacja, oparta o pracę "A Linear Programming Approach to the Cutting Stock Problem I" \cite{linear-programming}. Mimo, że we wspomnianej pracy rozważano użycie programowania dynamicznego do rozwiązania podproblemu (problem plecakowy), w naszym przypadku bardziej opłaca się rozwiązać go za pomocą programowania liniowego, gdyż daje nam ono możliwość wprowadzenia relaksacji. Ma to związek z tym, iż programowanie dynamiczne miałoby problem ze znalezieniem rozwiązania w dziedzinie liczb rzeczywistych. 
+Wykorzystując język AMPL przygotowana została pierwsza implementacja, oparta o pracę "A Linear Programming Approach to the Cutting Stock Problem I" \cite{linear-programming-gilmore}. Mimo, że we wspomnianej pracy rozważano użycie programowania dynamicznego do rozwiązania podproblemu (problem plecakowy), w naszym przypadku bardziej opłaca się rozwiązać go za pomocą programowania liniowego, gdyż daje nam ono możliwość wprowadzenia relaksacji. Ma to związek z tym, iż programowanie dynamiczne miałoby problem ze znalezieniem rozwiązania w dziedzinie liczb rzeczywistych. 
 
 Punktem wejściowym implementacji był model zaczerpnięty ze strony internetowej AMPL'a, który stosował metodę Gilmore-Gomory do rozwiązania podstawowego problemu cięcia materiału. Problem główny przedstawiał się w nim następująco:
-
-\[\min_p \sum_{j=1}^{M} p_j\]
-\[\forall{j} \! \in \! M\!: \,\, \sum_{i=1}^{N} o_{i,j} p_j >= d_i\]
-Gdzie...
-
-\begin{align*}
-D_i & : \text{Liczba wymaganych pojedynczych pręcików pręcików pręcików pręcików pręcików} \\
-O_i & : \text{Ilość prętów jaką i-ty wzorzec zawiera} \\
-P_j & : \text{J-ty wzorzec - unikalny opis schematu cięcia} \\
-\gamma_i & : \text{Koszt i-tej relaksacji} \\
-W_i & : \text{} \\
-M_i & : \text{maksymalny próg relaksacji dla i-tego pręta} \\
-\end{align*}
+\begin{equation}
+    \min_p \sum_{j=1}^{M} p_j
+\end{equation}
+\begin{equation}
+    \forall{i} \! \in \! N\!: \,\, \sum_{j=1}^{M} o_{i,j} p_j >= d_i
+\end{equation}
 
 Podproblem był zaś zdefiniowany następująco:
+\begin{equation}
+   \min_x (1 - \sum_{i=1}^{N} c_i x_i )
+\end{equation}
+\begin{equation}
+    \sum_{i=1}^{N} w_i x_i <= \sigma
+\end{equation}
+W problemie głównym minimalizujemy liczbę użyć poszczególnych wzorców \(p_j\) ze zbioru wszystkich dostępnych wzorców \(M\). Jako wzorzec rozumiemy tutaj sposób pocięcia bazowego prętu. Innymi słowy więc minimalizujemy liczbę bazowych prętów. Jedynym ograniczeniem problemu głównego jest wymuszenie spełnienia zamówienia \(N\) na które składa się ilość wymaganych odcinków prętów \(d_i\) o długościach \(w_i\). Zmienna \(o_{i,j}\) mówi nam o strukturze wzorców \(p_j\), a dokładnie o ilości wystąpień prętów o długości \(w_i\) we wzorcu \(p_j\). 
 
-\[\min_x (1 - \sum_{i=1}^{N} c_i x_i )\]
-ograniczenia:
-\[\sum_{i=1}^{N} w_i x_i <= \sigma\]
+Podproblem jest typowym modelem problemu plecakowego. Służy nam on do odnalezienia kolejnego optymalnego wzorca. Staramy się w nim zmaksymalizować (we wzorze jest minimalizacja z uwagi na odejmowanie od stałej) cenę nowego wzorca, na którą składają się ceny \(c_i\) i ilość \(x_i\) użytych w nim prętów od długości \(w_i\). Ceną w naszym przypadku jest aktualny koszt inkrementacji ilości zamówionych odcinków \(d_i\) wyrażony w surowych prętach. Tym samym jesteśmy w stanie policzyć cenę rozwiązując problem główny i przypisując poszczególnym odcinkom powiązane z nimi zmienne dualne.
+Pojedyncze ograniczenie zapewnia, że suma użytych elementów nie przekroczy długości prętu bazowego.
 
-Jest to typowy model problemu plecakowego, gdzie \(N\) jest zbiorem wymaganych odcinków pręta \(\{x_1, x_i,...,x_N\}\) o długościach \(w_i\) i cenach \(c_i\). Przez cenę rozumiemy aktualny koszt inkrementacji ilości zamówionych odcinków wyrażony w surowych prętach. Tym samym jesteśmy w stanie policzyć cenę rozwiązując problem główny i przypisując poszczególnym odcinkom powiązane z nimi zmienne dualne.
-Został on poddany kilku zmianom, mającym pozwolić na zastosowanie relaksacji. Finalnie, model przedstawia się następująco:
-\[\max_{x,y} (\sum_{i=1}^{N} (c_i x_i - y_i \gamma) - 1)\]
+Podproblem został poddany kilku zmianom, mającym pozwolić na zastosowanie relaksacji. Finalnie, przedstawia się on następująco:
+\begin{equation}
+    \max_{x,y} (\sum_{i=1}^{N} (c_i x_i - y_i \gamma) - 1)
+\end{equation}
+
 ograniczenia:
-\begin{displaymath}
-\sum_{i=1}^{N} w_i x_i - y_i <= \sigma
+\begin{equation}
+    \sum_{i=1}^{N} w_i x_i - y_i <= \sigma
 \label{ograniczenie1}
-\end{displaymath}
+\end{equation}
 
-\begin{displaymath}
- y_i <= m_i x_i
+\begin{equation}
+    y_i <= m_i x_i
 \label{ograniczenie2}
-\end{displaymath}
+\end{equation}
+W finalnej wersji dochodzą zmienne \(y_i\) oznaczające zrelaksowaną długość odcinka \(i\) wyrażoną w tych samych jednostkach co długość \(w_i\). Żeby nie dopuścić do sytuacji w której relaksacja zawsze będzie stosowana w najwyższym możliwym stopniu dodana jest stała \(\gamma\), będąca kosztem relaksacji. Dodano również nowe ograniczenie, zapewniające, że odcinek nie zostanie skrócony bardziej niż pozwala na to próg relaksacji \(m_i\).
 
-Gdzie ...
-W finalnej wersji staramy się w dobrać takie ułożenie \(x_i\), aby uzyskać jak największą wartość elementów \(c_i\) znajdujących się we wzorcu. Ograniczenia zaś zapewniają, że suma elementów nie przekroczy długości prętu bazowego \ref{ograniczenie1}, oraz że zachowamy granice dopuszczonej relaksacji \ref{ograniczenie2}. Po rozwiązaniu problemu uzyskujemy definicję wzorca \(x_i\) oraz łączną długości skróconego materiału dla każdego zamówienia \(y_i\). Koszt relaksacji \(\gamma\) zapewnia, że nie zawsze będzie ona wykorzystywana, a także że przybierze minimalne wartości.
- 
 Kolejne autorskie rozwiązanie postanowiliśmy oprzeć o algorytm BinPack \cite{bin-packing}, który pozwala rozwiązywać ten problem w czasie wielomianowym. Ogólna koncepcja jest dość prosta, jednak istnieją różne wersje tego problemu, przykładowo w wersji online możemy rozważać przypadek w którym nie znamy rozmiarów wszystkich pakowanych przedmiotów w danym momencie (pojawiają się one w kolejnych chwilach) i mamy ograniczony bufor, który opróżniamy pakując przedmioty do pojemników. Tak mogłaby wyglądać realizacja po stronie fabryki, która przykładowo co 10 minut produkuje pręt bazowy i musi go pociąć, na bazie tych zamówień które aktualnie ma, a które spływają z czasem. Nasze implementacje korzystają z wersji offline tego algorytmu, czyli jest to przypadek w którym już na samym początku znamy dokładnie zamówienie i są oparte na heurystyce First Fit Decreasing. Polega ona na tym że sortujemy pręty z zamówienia względem ich długości malejąco i umieszczamy w kolejnych pojemnikach, a robimy to tak że dany pręt umieszczamy w pierwszym miejscu w którym się mieści, a więc idąc od najdłuższych do najkrótszych za każdym razem sprawdzamy, czy pręt dla którego aktualnie szukamy miejsca nie zmieści się w pojemniku, do którego był dodany już poprzednio jakiś inny pręt. Ta heurystyka zapewnia znalezienie rozwiązania nie gorszego niż (4M+1)/3, gdzie M jest rozwiązaniem optymalnym, zatem ewentualnie gorszego o nie więcej niż ok. 30\% względem optimum, ale za to o dość niskiej złożoności $O(n) = n * log(n)$.
 
 Kolejna wersja tego algorytmu już uwzględnia relaksację, jednak robi to zachłannie. Jest oparta o ten sam algorytm co poprzednia (binPack), z tą drobną modyfikacją że poszukując miejsca na dany pręt poszukujemy miejsca dokładnie o tej długości lub mniejszego o wartość relaksacji (jeśli dany pręt może być skrócony).
 
 Istnieją sposoby rozwiązywania problemu pakowania do pojemników w czasie wielomianowym przy korzystaniu z odpowiednich aproksymacji. Jeden z nich przedstawiony jest w pracy \cite{bin-packing}. Odpowiednio grupując i usuwając pręty docelowe, a następnie rozwiązując zadania programowania liniowego można uzyskać czas wielomianowy (o dużym stopniu, co najmniej ósmym) i rozwiązanie o ilości pojemników co najwyżej wynoszącej $X = OPT + O(log^2(OPT))$ gdzie OPT to rozwiązanie optymalne.
+
+
+
+
+% 1961 Gilmore here
+% \subsubsection*{Dane}
+
+% \begin{align*}
+% J & : \text{Zbiór dostępnych cięć dla danej długość bazowej} \\
+% I & : \text{Zbiór dostępnych fragmentów bazowych.} \\
+% d_j & : \text{Wymagana ilość kawałków danej długości } j. \\
+% L & : \text{Długość pręta bazowego } \\
+% x_{ij} & : \text{Liczba kawałków rodzaju } j \text{ uzyskanych z rolki } i.
+% \end{align*}
+
+
+% \subsubsection*{Funkcja celu}
+
+% \begin{equation}
+% \text{Zadnie minimalizacji } Z = \sum_{i}\sum_{j} \left(l_i - \sum_{i} x_{ij} \cdot d_j \right)
+% \end{equation}
+
+% \subsubsection*{Ograniczenia}
+% \hfill\\
+% \text{Każdy pręt musi zostać zużyty:} 
+% \begin{equation}
+% \sum_{j} x_{ij} \cdot d_j \geq L \text{ for all } i
+% \end{equation}
+% \text{Liczba wymaganych fragmentów musi się pokrywać z wyciętymi}
+% \begin{equation}
+% \sum_{i} x_{ij} = d_j \text{ for all } ja
+% \end{equation}
+% \text{Oraz warunek nie ujemności zmiennych}
+% \begin{equation}
+% x_{ij} \geq 0 \text{ for all } i, j
+% \end{equation}
+
+% redukcja wzorców
+% \begin{enumerate}
+%   \item Rozwiązujemy problem poboczny - wyznaczamy pewną ilość wzorców do cięcia
+%   \item Poszukujemy optymalnego rozwiązania dla zadanych wzorców - ilości cięć według każdego wzorca - dla którego osiągamy najmniejszy koszt
+%   \item jeżeli rozwiązanie nie poprawiło się, kończymy algorytm, w przeciwnym wypadku zwiększamy ilość wzorców cięcia i wracamy do punktu 1.
+% \end{enumerate}
