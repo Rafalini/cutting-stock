@@ -33,6 +33,7 @@ for idx, input in enumerate(os.listdir(IN_DIR)):
     name = "optimal_" + input.split(".")[0]
 
     with open(os.path.join(OUT_DIR, name), "w") as outfile:
+        jsonData["fileName"] = name
         opt = optimalCutter.solve(jsonData, jsonData["factory_rod_size"])
         outfile.write(str(opt))
 

@@ -440,7 +440,7 @@ class StockCutter(AbstractSolver):
         # for idx, roll in enumerate(consumed_big_rolls): # {waste, [lengths...]}
         #     print(f"Roll #{idx}: {roll}")
 
-        Graphics.drawGraph(consumed_big_rolls, child_rolls, factoryRodSize)
+        Graphics.drawGraph(consumed_big_rolls, child_rolls, factoryRodSize, inputJsonDict)
         return len(consumed_big_rolls)
 
 

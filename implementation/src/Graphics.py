@@ -2,7 +2,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-def drawGraph(consumed_big_rolls, child_rolls, factoryRodSize):
+def drawGraph(consumed_big_rolls, child_rolls, factoryRodSize, inputJsonDict):
     # TODO: to add support for multiple different parent rolls, update here
     xSize = factoryRodSize  # width of big roll
     ySize = 10 * len(consumed_big_rolls)  # one big roll will take 10 units vertical space
@@ -54,4 +54,4 @@ def drawGraph(consumed_big_rolls, child_rolls, factoryRodSize):
 
         y1 += 10  # next big roll will be plotted on top of current, a roll height is 8, so 2 will be margin between rolls
 
-    plt.savefig("output/1.png")
+    plt.savefig("output/"+inputJsonDict["fileName"]+".png")
