@@ -14,11 +14,11 @@ def clearInputsOutputs():
     if not os.path.exists(outputDir):
         os.makedirs(outputDir)
 
-    for input in os.listdir(inputDir):
-        os.remove(os.path.join(inputDir, input))
+    for file in os.listdir(inputDir):
+        os.remove(os.path.join(inputDir, file))
 
-    for input in os.listdir(outputDir):
-        os.remove(os.path.join(outputDir,input))
+    for file in os.listdir(outputDir):
+        os.remove(os.path.join(outputDir,file))
 
 
 def generateData(relaxation=False, max_percentage=50, factory_rod_size=15, order_size=10):
@@ -43,7 +43,7 @@ def generateData(relaxation=False, max_percentage=50, factory_rod_size=15, order
 def reverseGenerator(relaxation=False, max_percentage=50, factory_rod_size=15, order_size=10):
     order={}
 
-    for i in range(order_size):
+    for _ in range(order_size):
 
         remaining_length = factory_rod_size
 
@@ -51,26 +51,38 @@ def reverseGenerator(relaxation=False, max_percentage=50, factory_rod_size=15, o
             # Generate a random number between 1 and the remaining sum
             random_num = random.randint(1, remaining_length)
             
-            # If the remaining sum is greater than the random number, append the random number
-            if remaining_sum > random_num:
+                # If the remaining sum is greater than the random number, append the random number
+            if remaining_length > random_num:
                 order[random_num] = order.get(random_num, 0) + 1
-                remaining_sum -= random_num
+                remaining_length -= random_num
             else:
                 # If the remaining sum is less than or equal to the random number, append the remaining sum
-                order[random_num] = order.get(remaining_sum, 0) + 1
+                order[random_num] = order.get(remaining_length, 0) + 1
                 break
 
+    data = []
+    for length, amount in order.items():
 
+        relaxation_length = random.randint(0, math.ceil(length*max_percentage/100)-1)
+        relaxation_number = random.randint(0, amount-1)
+        if not relaxation:
+            relaxation_length = 0
+            relaxation_number = 0
 
-    return {"factory_rod_size": factory_rod_size, "order": order}
+        data.append({"rod_size": length, "rods_number": amount, "relaxation_length": relaxation_length, "relaxation_number": relaxation_number})
+
+    return {"optimal_solution": order_size, "factory_rod_size": factory_rod_size, "order": data}
 
 if __name__ == "__main__":
     clearInputsOutputs()
+
+    minOrder = 10
+
+    if len(sys.argv) == 3:
+        minOrder = sys.argv[2]
+
     for i in range(1, int(sys.argv[1])+1):
         name = str(i) + ".json"
         with open(os.path.join("input", name), "w") as outfile:
-            if len(sys.argv) == 0:
-                data = generateData(relaxation=True, max_percentage = 20, factory_rod_size = 12, order_size=5 + i)
-            else:
-                data = generateData(relaxation=True, max_percentage = 20, factory_rod_size = 12, order_size=5 + i)
+            data = reverseGenerator(relaxation=True, max_percentage = 20, factory_rod_size = 12, order_size=minOrder + i*10)
             outfile.write(json.dumps(data))
