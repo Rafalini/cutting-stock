@@ -161,7 +161,6 @@ class StockCutter(AbstractSolver):
         for i in range(num_orders):
             # q = quantity, w = width; of i-th order
             quantity, width = demands[i][0], demands[i][1]
-            # TODO Verify: why min of quantity, parent_width/width?
             # assumes widths to be entered as percentage
             # int(round(parent_width/demands[i][1])) will always be >= 1, because widths of small rolls can't exceed parent_width (which is width of big roll)
             # b.append( min(demands[i][0], int(round(parent_width / demands[i][1]))) )

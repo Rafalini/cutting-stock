@@ -1,3 +1,4 @@
+import pandas as pd
 from solutions import BinPack
 from solutions import StockCutter
 import DataLoader
@@ -20,38 +21,49 @@ class bcolors:
 
 standardBinPack = BinPack.StandardBinPackSolver()
 optimalCutter = StockCutter.StockCutter() 
+opt = []
+std = []
+rel = []
 
 for idx, input in enumerate(os.listdir(IN_DIR)):
 
     print(bcolors.WARNING + "Progress: " + str(round(100 * (idx+1)/len(os.listdir(IN_DIR)),2))+"%   " + input)
 
     jsonData = DataLoader.loadData(os.path.join(IN_DIR, input))
-    opt = 0
-    std = 0
-    rel = 0
 
-    name = "optimal_" + input.split(".")[0]
+    # name = "optimal_" + input.split(".")[0]
 
-    with open(os.path.join(OUT_DIR, name), "w") as outfile:
-        jsonData["fileName"] = name
-        opt = optimalCutter.solve(jsonData, jsonData["factory_rod_size"])
-        outfile.write(str(opt))
+    # with open(os.path.join(OUT_DIR, name), "w") as outfile:
+    #     jsonData["fileName"] = name
+    #     opt.append(optimalCutter.solve(jsonData, jsonData["factory_rod_size"]))
+    #     outfile.write(str(opt[-1]))
 
-    name = "standard_binpack_" + input.split(".")[0]
+    # name = "standard_binpack_" + input.split(".")[0]
 
-    with open(os.path.join(OUT_DIR, name), "w") as outfile:
-        std = standardBinPack.solve(jsonData, jsonData["factory_rod_size"], False)
-        outfile.write(str(std))
+    # with open(os.path.join(OUT_DIR, name), "w") as outfile:
+    #     std.append(standardBinPack.solve(jsonData, jsonData["factory_rod_size"], False))
+    #     outfile.write(str(std[-1]))
 
     
-    name = "relaxed_binpack_" + input.split(".")[0]
+    # name = "relaxed_binpack_" + input.split(".")[0]
 
-    with open(os.path.join(OUT_DIR, name), "w") as outfile:
-        rel = standardBinPack.solve(jsonData, jsonData["factory_rod_size"], True)
-        outfile.write(str(rel))
+    # with open(os.path.join(OUT_DIR, name), "w") as outfile:
+    #     rel.append(standardBinPack.solve(jsonData, jsonData["factory_rod_size"], True))
+    #     outfile.write(str(rel[-1]))
 
-    # if std != rel:
-    #     print(bcolors.OKBLUE +"            opt: " + str(opt))
-    #     print(bcolors.OKBLUE +"             std: " + str(std))
-    #     print(bcolors.OKBLUE +"             rel: " + str(rel))
+    std.append(standardBinPack.solve(jsonData, jsonData["factory_rod_size"], False))
+    # opt.append(optimalCutter.solve(jsonData, jsonData["factory_rod_size"]))
+    opt.append(jsonData["optimal_solution"])
+    rel.append(standardBinPack.solve(jsonData, jsonData["factory_rod_size"], True))
+
+
+data = {
+  "optimal": opt,
+  "backpack": std,
+  "backpack_relaxed" : rel
+}
+
+#load data into a DataFrame object:
+df = pd.DataFrame(data)
+df.to_csv(os.path.join(OUT_DIR, "summary.csv"))
 

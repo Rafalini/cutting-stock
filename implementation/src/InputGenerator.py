@@ -63,8 +63,8 @@ def reverseGenerator(relaxation=False, max_percentage=50, factory_rod_size=15, o
     data = []
     for length, amount in order.items():
 
-        relaxation_length = random.randint(0, math.ceil(length*max_percentage/100)-1)
         relaxation_number = random.randint(0, amount-1)
+        relaxation_length = random.randint(0, math.ceil(length*max_percentage/100)-1)
         if not relaxation:
             relaxation_length = 0
             relaxation_number = 0

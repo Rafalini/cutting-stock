@@ -2,3 +2,4 @@ ortools
 typer
 matplotlib
 ortools
+pandas
