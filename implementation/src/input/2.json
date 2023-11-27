@@ -1,0 +1,78 @@
+{
+    "optimal_solution": 21,
+    "factory_rod_size": 12,
+    "order": [
+        {
+            "rod_size": 2,
+            "rods_number": 10,
+            "relaxation_length": 0,
+            "relaxation_number": 8
+        },
+        {
+            "rod_size": 9,
+            "rods_number": 5,
+            "relaxation_length": 0,
+            "relaxation_number": 2
+        },
+        {
+            "rod_size": 1,
+            "rods_number": 20,
+            "relaxation_length": 0,
+            "relaxation_number": 0
+        },
+        {
+            "rod_size": 11,
+            "rods_number": 2,
+            "relaxation_length": 1,
+            "relaxation_number": 1
+        },
+        {
+            "rod_size": 10,
+            "rods_number": 3,
+            "relaxation_length": 1,
+            "relaxation_number": 0
+        },
+        {
+            "rod_size": 5,
+            "rods_number": 3,
+            "relaxation_length": 0,
+            "relaxation_number": 0
+        },
+        {
+            "rod_size": 4,
+            "rods_number": 6,
+            "relaxation_length": 0,
+            "relaxation_number": 3
+        },
+        {
+            "rod_size": 7,
+            "rods_number": 3,
+            "relaxation_length": 1,
+            "relaxation_number": 2
+        },
+        {
+            "rod_size": 12,
+            "rods_number": 2,
+            "relaxation_length": 2,
+            "relaxation_number": 0
+        },
+        {
+            "rod_size": 3,
+            "rods_number": 3,
+            "relaxation_length": 0,
+            "relaxation_number": 2
+        },
+        {
+            "rod_size": 6,
+            "rods_number": 1,
+            "relaxation_length": 0,
+            "relaxation_number": 0
+        },
+        {
+            "rod_size": 8,
+            "rods_number": 2,
+            "relaxation_length": 0,
+            "relaxation_number": 1
+        }
+    ]
+}
