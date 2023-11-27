@@ -76,13 +76,13 @@ def reverseGenerator(relaxation=False, max_percentage=50, factory_rod_size=15, o
 if __name__ == "__main__":
     clearInputsOutputs()
 
-    minOrder = 10
+    minOrder = 1
 
     if len(sys.argv) == 3:
         minOrder = sys.argv[2]
 
     for i in range(1, int(sys.argv[1])+1):
-        name = str(i) + ".json"
+        name = f"{'out_'}{i:0003}" + ".json"
         with open(os.path.join("input", name), "w") as outfile:
             data = reverseGenerator(relaxation=True, max_percentage = 20, factory_rod_size = 12, order_size=minOrder + i*10)
             outfile.write(json.dumps(data))

@@ -1,0 +1,66 @@
+from amplpy import AMPL
+
+ampl = AMPL()
+ampl.option['solver'] = 'cplex'
+ampl.eval(r"""
+
+
+option solver cplex;
+option solution_round 6;
+
+model ampl/cut.mod;
+data ampl/cut.dat;
+
+problem Cutting_Opt: Cut, Number, Fill;
+   option relax_integrality 1;
+   option presolve 0;
+
+problem Pattern_Gen: Use, Relax, Reduced_Cost, Width_Limit, Relax_Limit;
+   option relax_integrality 0;
+   option presolve 1;
+
+#let relax_cost := 100; #uncomment to solve without relax
+let nPAT := 0;
+#setting up one pattern for every width
+for {i in WIDTHS} 
+{			
+	let nPAT := nPAT + 1;
+	let wfep[i,nPAT] := floor (bar_width/i);
+	let {i2 in WIDTHS: i2 <> i} wfep[i2,nPAT] := 0;
+	let {i3 in WIDTHS} rfep[i3,nPAT] := 0;
+};
+
+repeat
+{
+	solve Cutting_Opt;
+
+	#new price is a cost in raw bars associated with incrementing orders by 1 for every width
+	let {i in WIDTHS} price[i] := Fill[i].dual;
+
+	solve Pattern_Gen;
+
+	if Reduced_Cost > 0.00001 then 
+	{
+		let nPAT := nPAT + 1;
+		let {i in WIDTHS} wfep[i,nPAT] := Use[i];
+		let {i in WIDTHS} rfep[i,nPAT] := Relax[i];
+	}
+	else
+		break;
+};
+
+
+display rfep;
+display wfep;
+display Cut;
+
+option Cutting_Opt.relax_integrality 0;
+option Cutting_Opt.presolve 10;
+solve Cutting_Opt;
+
+display Cut;
+
+
+""")
+
+ampl.solve()

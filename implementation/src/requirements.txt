@@ -3,3 +3,4 @@ typer
 matplotlib
 ortools
 pandas
+amplpy

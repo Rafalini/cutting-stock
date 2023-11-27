@@ -25,7 +25,10 @@ opt = []
 std = []
 rel = []
 
-for idx, input in enumerate(os.listdir(IN_DIR)):
+files = os.listdir(IN_DIR)
+files.sort()
+
+for idx, input in enumerate(files):
 
     print(bcolors.WARNING + "Progress: " + str(round(100 * (idx+1)/len(os.listdir(IN_DIR)),2))+"%   " + input)
 
