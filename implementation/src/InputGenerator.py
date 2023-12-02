@@ -3,22 +3,31 @@ import math
 import random
 import os, sys
 from unittest import result
+import argparse
+
+
+parser=argparse.ArgumentParser()
+parser.add_argument("--input-dir", help="Input directory", default="input")
+parser.add_argument("--output-dir", help="Output directory", default="output")
+parser.add_argument("--samples", help="Samples number", default=10, type=int)
+parser.add_argument("--min-order", help="Min order", default=5, type=int)
+parser.add_argument("--mode", help="Generation mode", choices=["random", "reverse"], default="reverse")
+parser.add_argument("--batch", help="Amount in batch of given size", default=5, type=int)
+args=parser.parse_args()
+
 
 def clearInputsOutputs():
 
-    inputDir = 'input'
-    outputDir = 'output'
+    if not os.path.exists(args.input_dir):
+        os.makedirs(args.input_dir)
+    if not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir)
 
-    if not os.path.exists(inputDir):
-        os.makedirs(inputDir)
-    if not os.path.exists(outputDir):
-        os.makedirs(outputDir)
+    for file in os.listdir(args.input_dir):
+        os.remove(os.path.join(args.input_dir, file))
 
-    for file in os.listdir(inputDir):
-        os.remove(os.path.join(inputDir, file))
-
-    for file in os.listdir(outputDir):
-        os.remove(os.path.join(outputDir,file))
+    for file in os.listdir(args.output_dir):
+        os.remove(os.path.join(args.output_dir,file))
 
 
 def generateData(relaxation=False, max_percentage=50, factory_rod_size=15, order_size=10):
@@ -73,16 +82,25 @@ def reverseGenerator(relaxation=False, max_percentage=50, factory_rod_size=15, o
 
     return {"optimal_solution": order_size, "factory_rod_size": factory_rod_size, "order": data}
 
+
 if __name__ == "__main__":
     clearInputsOutputs()
 
     minOrder = 1
 
     if len(sys.argv) == 3:
-        minOrder = sys.argv[2]
+        minOrder = args.min_order
 
-    for i in range(1, int(sys.argv[1])+1):
-        name = f"{'out_'}{i:0003}" + ".json"
-        with open(os.path.join("input", name), "w") as outfile:
-            data = reverseGenerator(relaxation=True, max_percentage = 20, factory_rod_size = 12, order_size=minOrder + i*10)
+    for i in range(1, args.samples+1):
+        name = f"{'out_'}{i:04}" + ".json"
+        with open(os.path.join(args.input_dir, name), "w") as outfile:
+            data = []
+
+            for j in range(args.batch):
+                match args.mode:
+                    case "reverse":
+                        data.append(reverseGenerator(relaxation=True, max_percentage = 20, factory_rod_size = 12, order_size=minOrder + i))
+                    case "random":
+                        data.append(generateData(relaxation=True, max_percentage = 20, factory_rod_size = 12, order_size=minOrder + i))
+
             outfile.write(json.dumps(data))

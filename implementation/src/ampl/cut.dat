@@ -1,8 +1,9 @@
 data;
-param bar_width := 110 ;
-param: WIDTHS: orders   maxRelax :=
-          20     48		3
-          45     35		0
-          50     24		0
-          55     10		0
-          75      8  	0;
+param rawBarWidth := 110 ;
+param: ORDERS: widths  barsNum  maxRelax :=
+	1	20		20		0
+	2	20		38		3
+    3	45		35		0
+    4	50		24		0
+    5	55		10		0
+    6	75		8  		0;

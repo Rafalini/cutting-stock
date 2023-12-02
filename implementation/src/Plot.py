@@ -2,7 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Read the CSV file
-data = pd.read_csv('output/summary.csv')
+data = pd.read_csv('output/effi_summary.csv')
+data = pd.read_csv('output/time_summary.csv')
 
 # Extract the columns for plotting
 columns_to_plot = ['backpack', 'backpack_relaxed']

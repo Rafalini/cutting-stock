@@ -1,4 +1,3 @@
-import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
@@ -54,4 +53,4 @@ def drawGraph(consumed_big_rolls, child_rolls, factoryRodSize, inputJsonDict):
 
         y1 += 10  # next big roll will be plotted on top of current, a roll height is 8, so 2 will be margin between rolls
 
-    plt.savefig("output/"+inputJsonDict["fileName"]+".png")
+    plt.savefig(inputJsonDict["fileDir"]+"/"+inputJsonDict["fileName"]+".png")

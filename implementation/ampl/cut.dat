@@ -1,8 +1,0 @@
-data;
-param bar_width := 110 ;
-param: WIDTHS: orders   maxRelax :=
-          20     48		3
-          45     35		0
-          50     24		0
-          55     10		0
-          75      8  	0;
