@@ -26,8 +26,8 @@ def clearInputsOutputs():
     for file in os.listdir(args.input_dir):
         os.remove(os.path.join(args.input_dir, file))
 
-    for file in os.listdir(args.output_dir):
-        os.remove(os.path.join(args.output_dir,file))
+    # for file in os.listdir(args.output_dir):
+    #     os.remove(os.path.join(args.output_dir,file))
 
 
 def generateData(relaxation=False, max_percentage=50, factory_rod_size=15, order_size=10):
@@ -99,8 +99,8 @@ if __name__ == "__main__":
             for j in range(args.batch):
                 match args.mode:
                     case "reverse":
-                        data.append(reverseGenerator(relaxation=True, max_percentage = 20, factory_rod_size = 12, order_size=minOrder + i))
+                        data.append(reverseGenerator(relaxation=False, max_percentage = 20, factory_rod_size = 12, order_size=minOrder + i))
                     case "random":
-                        data.append(generateData(relaxation=True, max_percentage = 20, factory_rod_size = 12, order_size=minOrder + i))
+                        data.append(generateData(relaxation=False, max_percentage = 20, factory_rod_size = 12, order_size=minOrder + i))
 
             outfile.write(json.dumps(data))

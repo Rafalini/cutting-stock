@@ -6,7 +6,7 @@ import DataLoader
 import os
 import time
 
-IN_DIR = "input"
+IN_DIR = "input2"
 OUT_DIR = "output"
 
 class bcolors:
@@ -23,6 +23,7 @@ class bcolors:
 
 standardBinPack = BinPack.StandardBinPackSolver()
 optimalCutter = StockCutter.StockCutter() 
+tru = []
 opt = []
 std = []
 rel = []
@@ -86,7 +87,10 @@ for idx, input in enumerate(files):
     opt.append(sum(tmpOpt)/len(tmpOpt))
     time_opt.append("{:.4f}".format((time.time() - start)/len(tmpOpt),5))
 
+    tru.append(jsonArr[0]["optimal_solution"])
+
 data = {
+  "true": tru,
   "optimal": opt,
   "backpack": std,
   "backpack_relaxed" : rel
@@ -100,6 +104,6 @@ timedata = {
 
 #load data into a DataFrame object:
 df = pd.DataFrame(data)
-df.to_csv(os.path.join(OUT_DIR, "effi_summary2.csv"))
+df.to_csv(os.path.join(OUT_DIR, "effi_summary.csv"))
 df = pd.DataFrame(timedata)
-df.to_csv(os.path.join(OUT_DIR, "time_summary2.csv"))
+df.to_csv(os.path.join(OUT_DIR, "time_summary.csv"))
