@@ -5,9 +5,12 @@ from solutions import AmplSolver
 import DataLoader
 import os
 import time
+import argparse
 
-IN_DIR = "input2"
-OUT_DIR = "output"
+parser=argparse.ArgumentParser()
+parser.add_argument("--input-dir", help="Input directory", default="input")
+parser.add_argument("--output-dir", help="Output directory", default="output")
+args=parser.parse_args()
 
 class bcolors:
     HEADER = '\033[95m'
@@ -33,14 +36,14 @@ time_std = []
 time_rel = []
 
 
-files = os.listdir(IN_DIR)
+files = os.listdir(args.input_dir)
 files.sort()
 
 for idx, input in enumerate(files):
 
-    print(bcolors.WARNING + "Progress: " + str(round(100 * (idx+1)/len(os.listdir(IN_DIR)),2))+"%   " + input)
+    print(bcolors.WARNING + "Progress: " + str(round(100 * (idx+1)/len(os.listdir(args.input_dir)),2))+"%   " + input)
 
-    jsonArr = DataLoader.loadData(os.path.join(IN_DIR, input))
+    jsonArr = DataLoader.loadData(os.path.join(args.input_dir, input))
 #Standard binpack
     start = time.time()
     tmpStd = []
@@ -62,7 +65,7 @@ for idx, input in enumerate(files):
     # start = time.time()
     # tmpOpt = []
     # for jsonData in jsonArr:
-    #   jsonData["fileDir"] = OUT_DIR
+    #   jsonData["fileDir"] = args.output_dir
     #   name = "optimal_" + input.split(".")[0]
     #   jsonData["fileName"] = name
     #   jsonData["saveFigure"] = False
@@ -76,7 +79,7 @@ for idx, input in enumerate(files):
     # time_opt.append("{:.4f}".format((time.time() - start)/len(tmpOpt),5))
 
     ampl = AmplSolver.AmplSolver()
-    fileList = ampl.prepareDataFiles(os.path.join(IN_DIR, input))
+    fileList = ampl.prepareDataFiles(os.path.join(args.input_dir, input))
     tmpOpt = []
 
     start = time.time()
@@ -97,6 +100,7 @@ data = {
 }
 
 timedata = {
+  "true": tru,
   "optimal": time_opt,
   "backpack": time_std,
   "backpack_relaxed" : time_rel
@@ -104,6 +108,6 @@ timedata = {
 
 #load data into a DataFrame object:
 df = pd.DataFrame(data)
-df.to_csv(os.path.join(OUT_DIR, "effi_summary.csv"))
+df.to_csv(os.path.join(args.output_dir, "effi_summary3.csv"))
 df = pd.DataFrame(timedata)
-df.to_csv(os.path.join(OUT_DIR, "time_summary.csv"))
+df.to_csv(os.path.join(args.output_dir, "time_summary3.csv"))

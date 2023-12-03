@@ -15,6 +15,7 @@ parser.add_argument("--mode", help="Generation mode", choices=["random", "revers
 parser.add_argument("--batch", help="Amount in batch of given size", default=5, type=int)
 args=parser.parse_args()
 
+factor = 3
 
 def clearInputsOutputs():
 
@@ -71,12 +72,11 @@ def reverseGenerator(relaxation=False, max_percentage=50, factory_rod_size=15, o
 
     data = []
     for length, amount in order.items():
-
-        relaxation_number = random.randint(0, amount-1)
-        relaxation_length = random.randint(0, math.ceil(length*max_percentage/100)-1)
-        if not relaxation:
-            relaxation_length = 0
-            relaxation_number = 0
+        relaxation_length = 0
+        relaxation_number = 0
+        if length > 2 and relaxation:
+            relaxation_number = random.randint(0, amount-1)
+            relaxation_length = math.ceil(length * random.randint(1, max_percentage)/100)
 
         data.append({"rod_size": length, "rods_number": amount, "relaxation_length": relaxation_length, "relaxation_number": relaxation_number})
 
@@ -99,8 +99,10 @@ if __name__ == "__main__":
             for j in range(args.batch):
                 match args.mode:
                     case "reverse":
-                        data.append(reverseGenerator(relaxation=False, max_percentage = 20, factory_rod_size = 12, order_size=minOrder + i))
+                        data.append(reverseGenerator(relaxation=True, max_percentage = 20, factory_rod_size = 12, order_size=minOrder + i*factor))
+                        # data.append(reverseGenerator(relaxation=False, max_percentage = 20, factory_rod_size = 12, order_size=minOrder + i*factor))
                     case "random":
-                        data.append(generateData(relaxation=False, max_percentage = 20, factory_rod_size = 12, order_size=minOrder + i))
+                        data.append(generateData(relaxation=True, max_percentage = 20, factory_rod_size = 12, order_size=minOrder + i*factor))
+                        # data.append(generateData(relaxation=False, max_percentage = 20, factory_rod_size = 12, order_size=minOrder + i*factor))
 
             outfile.write(json.dumps(data))

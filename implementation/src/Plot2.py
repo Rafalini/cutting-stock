@@ -3,13 +3,12 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 # Read the CSV file
-data = pd.read_csv('output/effi_summary2.csv')
-# data = pd.read_csv('output/time_summary2.csv')
+data = pd.read_csv('output/effi_summary4.csv')
 
 # Extract the columns for plotting
 columns_to_plot = ['optimal', 'backpack', 'backpack_relaxed']
 
-data['optimal'] -= data['optimal']
+data['optimal'] -= data['true']
 data['backpack'] -= data['true']
 data['backpack_relaxed'] -= data['true']
 data['binpack_deviation'] = 100 * data['backpack'] / data['true']
@@ -27,7 +26,7 @@ plot_font_size = 40
 
 fig, (ax1, ax2) = plt.subplots(2, 1, layout='constrained')
 
-ax1.bar(data['true'] ,data['backpack'], color='green')
+ax1.bar(data['true'] ,data['backpack'], color='green', width=1)
 
 # ax1.set_ylim(0,20)
 ax1.spines['left'].set_position('zero')
@@ -58,7 +57,7 @@ ax2.set_xticks(x_ticks)
 ax2.tick_params(axis='both', which='major', labelsize=axis_number_font_size)
 ax2.tick_params(axis='both', which='minor', labelsize=axis_number_font_size)
 ax2.grid(True)
-ax2.set_ylabel('Percentage points', fontsize=subplot_font_size)
+ax2.set_ylabel('Overestimation, [%]', fontsize=subplot_font_size)
 ax2.set_xlabel('Percentage difference between solution found and optimal', fontsize=subplot_font_size)
 ax2.set_xlim(0,1000)
 
