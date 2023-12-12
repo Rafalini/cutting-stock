@@ -17,16 +17,21 @@ class AmplSolver(AbstractSolver):
         self.solver.set_output_handler(OutputHandler())
         self.solver.option['solver'] = 'cplex'
 
+    def reset(self):
+        self.solver.reset()
+
     def prepareData(self, inputOrder, outputFile):
 
         with open(outputFile, "w") as outfile:
             outfile.write("""
-                data;
-                param rawBarWidth := 12 ;
-                param: ORDERS: widths  barsNum  maxRelax :=
-            """)
+data;
+param rawBarWidth := """)
+            outfile.write(str(inputOrder["factory_rod_size"]))
+            outfile.write(""";
+param: ORDERS: widths  barsNum  maxRelax :=
+""")
             i = 1
-            for order in inputOrder["order"]:
+            for order in inputOrder["relaxedOrder"]:
                 if order["relaxation_number"] > 0:
                     outfile.write(str(i)+" "+str(order["rod_size"]) +" "+str(order["relaxation_number"]) +" "+ str(order["relaxation_length"])+"\n")
                     i+=1

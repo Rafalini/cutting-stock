@@ -12,7 +12,7 @@ class BinPacker(AbstractSolver):
 
     def getRelaxedOrderLengths(self, jsonFile):
         lengths = []
-        for i in jsonFile["order"]:
+        for i in jsonFile["relaxedOrder"]:
             for j in range(i["relaxation_number"]):
                 lengths.append(i["rod_size"] - i["relaxation_length"])
             for j in range(i["rods_number"] - i["relaxation_number"]):
