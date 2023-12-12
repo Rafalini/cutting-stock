@@ -1,6 +1,26 @@
+W ramach pracy przygotowanych zostało kilka implementacji rozwiązujących problem cięcia materiału z możliwą relaksacją. Posłużą one do końcowego porównania i wyciągnięcia wniosków.
+
+\subsection{Model AMPL}
 Wykorzystując język AMPL przygotowana została pierwsza implementacja, oparta o pracę "A Linear Programming Approach to the Cutting Stock Problem I" \cite{linear-programming-gilmore}. Mimo, że we wspomnianej pracy rozważano użycie programowania dynamicznego do rozwiązania podproblemu (problem plecakowy), w naszym przypadku bardziej opłaca się rozwiązać go za pomocą programowania liniowego, gdyż daje nam ono możliwość wprowadzenia relaksacji. Ma to związek z tym, iż programowanie dynamiczne miałoby problem ze znalezieniem rozwiązania w dziedzinie liczb rzeczywistych. 
 
-Punktem wejściowym implementacji był model zaczerpnięty ze strony internetowej AMPL'a, który stosował metodę Gilmore-Gomory do rozwiązania podstawowego problemu cięcia materiału. Problem główny przedstawiał się w nim następująco:
+Punktem wejściowym implementacji był model zaczerpnięty ze strony internetowej AMPL'a, który stosował metodę Gilmore-Gomory do rozwiązania podstawowego problemu cięcia materiału. Użyta  tam metoda generacji kolumn polega na stopniowym rozwiązywaniu problemu z coraz to większą liczbą zmiennych. W naszym przypadku zmiennymi, które będą dokładane po każdej iteracji są kolejne wzorce. Jako wzorzec rozumiemy tutaj sposób pocięcia bazowego prętu. Ogólny zarys algorytmu wygląda następująco:
+\begin{algorithm}[!t]
+\raggedright
+\caption{Ogólny algorytm metody generacji kolumn}
+\label{alg1}
+\textbf{Krok 1.} Zainicjalizuj problem główny i podproblem.
+\smallskip
+
+\textbf{Krok 2.} Rozwiąż problem główny.
+\smallskip
+
+\textbf{Krok 3.} Rozwiązując podproblem, spróbuj znaleźć zmienną która poprawi wynik problemu głównego.
+\smallskip
+
+\textbf{Krok 4.} Jeżeli taka zmienna istnieje, wróć do \textbf{kroku 2.} w przeciwnym wypadku zakończ algorytm.
+\end{algorithm}
+
+Problem główny przedstawia się następująco:
 \begin{equation}
     \min_p \sum_{j=1}^{M} p_j
 \end{equation}
@@ -15,14 +35,15 @@ Podproblem był zaś zdefiniowany następująco:
 \begin{equation}
     \sum_{i=1}^{N} w_i x_i <= \sigma
 \end{equation}
-W problemie głównym minimalizujemy liczbę użyć poszczególnych wzorców \(p_j\) ze zbioru wszystkich dostępnych wzorców \(M\). Jako wzorzec rozumiemy tutaj sposób pocięcia bazowego prętu. Innymi słowy więc minimalizujemy liczbę bazowych prętów. Jedynym ograniczeniem problemu głównego jest wymuszenie spełnienia zamówienia \(N\) na które składa się ilość wymaganych odcinków prętów \(d_i\) o długościach \(w_i\). Zmienna \(o_{i,j}\) mówi nam o strukturze wzorców \(p_j\), a dokładnie o ilości wystąpień prętów o długości \(w_i\) we wzorcu \(p_j\). 
+W problemie głównym minimalizujemy liczbę użyć poszczególnych wzorców \(p_j\) ze zbioru wszystkich dostępnych wzorców \(M\). Innymi słowy więc minimalizujemy liczbę bazowych prętów. Jedynym ograniczeniem problemu głównego jest wymuszenie spełnienia zamówienia \(N\) na które składa się ilość wymaganych odcinków prętów \(d_i\) o długościach \(w_i\). Zmienna \(o_{i,j}\) mówi nam o strukturze wzorców \(p_j\), a dokładnie o ilości wystąpień prętów o długości \(w_i\) we wzorcu \(p_j\). 
 
 Podproblem jest typowym modelem problemu plecakowego. Służy nam on do odnalezienia kolejnego optymalnego wzorca. Staramy się w nim zmaksymalizować (we wzorze jest minimalizacja z uwagi na odejmowanie od stałej) cenę nowego wzorca, na którą składają się ceny \(c_i\) i ilość \(x_i\) użytych w nim prętów od długości \(w_i\). Ceną w naszym przypadku jest aktualny koszt inkrementacji ilości zamówionych odcinków \(d_i\) wyrażony w surowych prętach. Tym samym jesteśmy w stanie policzyć cenę rozwiązując problem główny i przypisując poszczególnym odcinkom powiązane z nimi zmienne dualne.
-Pojedyncze ograniczenie zapewnia, że suma użytych elementów nie przekroczy długości prętu bazowego.
+Pojedyncze ograniczenie zapewnia, że suma użytych elementów nie przekroczy długości prętu bazowego \(\sigma\).
 
 Podproblem został poddany kilku zmianom, mającym pozwolić na zastosowanie relaksacji. Finalnie, przedstawia się on następująco:
 \begin{equation}
     \max_{x,y} (\sum_{i=1}^{N} (c_i x_i - y_i \gamma) - 1)
+\label{podproblemRelaks}
 \end{equation}
 
 ograniczenia:
@@ -35,11 +56,93 @@ ograniczenia:
     y_i <= m_i x_i
 \label{ograniczenie2}
 \end{equation}
-W finalnej wersji dochodzą zmienne \(y_i\) oznaczające zrelaksowaną długość odcinka \(i\) wyrażoną w tych samych jednostkach co długość \(w_i\). Żeby nie dopuścić do sytuacji w której relaksacja zawsze będzie stosowana w najwyższym możliwym stopniu dodana jest stała \(\gamma\), będąca kosztem relaksacji. Dodano również nowe ograniczenie, zapewniające, że odcinek nie zostanie skrócony bardziej niż pozwala na to próg relaksacji \(m_i\).
+W finalnej wersji dochodzą zmienne \(y_i\), oznaczające zrelaksowaną długość wszystkich użytych w danym wzorcu odcinków \(i\), wyrażoną w tych samych jednostkach co długość \(w_i\). Żeby nie dopuścić do sytuacji w której relaksacja zawsze będzie stosowana w najwyższym możliwym stopniu dodana jest stała \(\gamma\), będąca kosztem relaksacji. Dodano również nowe ograniczenie, zapewniające, że odcinek nie zostanie skrócony bardziej niż pozwala na to próg relaksacji \(m_i\).
 
-Kolejne autorskie rozwiązanie postanowiliśmy oprzeć o algorytm BinPack \cite{bin-packing}, który pozwala rozwiązywać ten problem w czasie wielomianowym. Ogólna koncepcja jest dość prosta, jednak istnieją różne wersje tego problemu, przykładowo w wersji online możemy rozważać przypadek w którym nie znamy rozmiarów wszystkich pakowanych przedmiotów w danym momencie (pojawiają się one w kolejnych chwilach) i mamy ograniczony bufor, który opróżniamy pakując przedmioty do pojemników. Tak mogłaby wyglądać realizacja po stronie fabryki, która przykładowo co 10 minut produkuje pręt bazowy i musi go pociąć, na bazie tych zamówień które aktualnie ma, a które spływają z czasem. Nasze implementacje korzystają z wersji offline tego algorytmu, czyli jest to przypadek w którym już na samym początku znamy dokładnie zamówienie i są oparte na heurystyce First Fit Decreasing. Polega ona na tym że sortujemy pręty z zamówienia względem ich długości malejąco i umieszczamy w kolejnych pojemnikach, a robimy to tak że dany pręt umieszczamy w pierwszym miejscu w którym się mieści, a więc idąc od najdłuższych do najkrótszych za każdym razem sprawdzamy, czy pręt dla którego aktualnie szukamy miejsca nie zmieści się w pojemniku, do którego był dodany już poprzednio jakiś inny pręt. Ta heurystyka zapewnia znalezienie rozwiązania nie gorszego niż \((4M+1)/3\), gdzie M jest rozwiązaniem optymalnym, zatem ewentualnie gorszego o nie więcej niż ok. 30\% względem optimum, ale za to o dość niskiej złożoności $O(n) = n * log(n)$.
+\subsubsection{Przykład użycia modelu AMPL}
 
-Kolejna wersja tego algorytmu już uwzględnia relaksację, jednak robi to zachłannie. Jest oparta o ten sam algorytm co poprzednia (binPack), z tą drobną modyfikacją że poszukując miejsca na dany pręt poszukujemy miejsca dokładnie o tej długości lub mniejszego o wartość relaksacji (jeśli dany pręt może być skrócony).
+\begin{table}[b]
+\centering
+\caption{Przykład zamówienia}
+\label{order1}
+\begin{tabular}{ccc}
+\hline
+Długości prętów [cm] & ilość & max relaksacja [cm]\\\hline\hline
+200 & 20 & 0\\
+200 & 38 & 30\\
+450 & 35 & 0\\
+500 & 24 & 0\\
+\hline
+\end{tabular}
+\end{table}
+
+Załóżmy, że mamy do zaplanowania zamówienie o parametrach przedstawionych w tabeli \ref{order1}. Pierwszym krokiem algorytmu jest inicjalizacja problemów. W tym przypadku oznacza to stworzenie wstępnego zbioru wzorców \(M\). Na początku będzie on zawierał wyłącznie trywialne wzorce, składające się z jednego rodzaju odcinka z zamówienia. Długość prętu bazowego \(\sigma = 1200cm\), a więc kolejne wzorce będą zawierać \(\lfloor \sigma/w_i \rfloor\) prętów.
+
+\[
+    o_{i,j} = 
+    \begin{vmatrix}
+        6 & 0 & 0 & 0 \\
+        0 & 6 & 0 & 0 \\
+        0 & 0 & 2 & 0 \\
+        0 & 0 & 0 & 2 \\
+    \end{vmatrix}
+\]
+Mając zdefiniowany zbiór wzorców możemy przystąpić do rozwiązania problemu głównego w dziedzinie liczb rzeczywistych. Wynik tego rozwiązania oraz wyznaczone zmienne dualne, które staną się nowymi cenami poszczególnych długości prętów, są następujące.
+
+\[
+    p_j = 
+    \begin{vmatrix}
+        3.333 \\
+        6.333 \\
+        17.5 \\
+        12 \\
+    \end{vmatrix}
+    \quad
+    c_i = 
+    \begin{vmatrix}
+        0.167 & 0.167 & 0.5 & 0.5
+    \end{vmatrix}
+\]
+Następnym krokiem jest rozwiązanie podproblemu w celu znalezienia nowego wzorca poprawiającego rozwiązanie. Po wykonanej optymalizacji otrzymujemy nowy wzorzec:
+\[
+    o_{i,j} = 
+    \begin{vmatrix}
+        6 & 0 & 0 & 0 \\
+        0 & 6 & 0 & 0 \\
+        0 & 0 & 2 & 0 \\
+        0 & 0 & 0 & 2 \\
+        2 & 2 & 1 & 0 \\
+    \end{vmatrix}
+\]
+którego wartości relaksacji są równe:
+\[
+    y =     
+    \begin{vmatrix}
+        0 & 57 & 0 & 0
+    \end{vmatrix}
+\]
+Jak widać, nowo wyznaczony wzorzec już uwzględnia zastosowanie relaksacji. Optymalnym rozwiązaniem okazało się skrócenie prętów \(w_i = 200\text{cm}\) o \(y_i/x_i=28{,}5 \text{cm}\). Ponieważ rozwiązanie podproblemu \ref{podproblemRelaks} dało wynik większy od zera, algorytm jest kontynuowany. Wracamy więc do rozwiązania problemu głównego i wyznaczenia nowych cen już z rozszerzonym zestawem wzorców. Gdy jedno z rozwiązań podproblemu da wynik ujemny, generowanie kolejnych wzorców zostanie zaniechane. Krokiem kończącym jest ostatnie rozwiązanie problemu głównego tym razem jednak w dziedzinie liczb całkowitych.
+
+\subsection{Implementacje oparte na heurystyce First Fit Decreasing}
+
+Kolejne autorskie rozwiązanie postanowiliśmy oprzeć o algorytm BinPack, który pozwala rozwiązywać ten problem w czasie wielomianowym. Ogólna koncepcja jest dość prosta, jednak istnieją różne wersje tego problemu, przykładowo w wersji online możemy rozważać przypadek w którym nie znamy rozmiarów wszystkich pakowanych przedmiotów w danym momencie (pojawiają się one w kolejnych chwilach) i mamy ograniczony bufor, który opróżniamy pakując przedmioty do pojemników. Tak mogłaby wyglądać realizacja po stronie fabryki, która przykładowo co 10 minut produkuje pręt bazowy i musi go pociąć, na bazie tych zamówień które aktualnie ma, a które spływają z czasem. Nasze implementacje korzystają z wersji offline tego algorytmu, czyli jest to przypadek w którym już na samym początku znamy dokładnie zamówienie i są oparte na heurystyce First Fit Decreasing. Kolejne kroki przedstawione są w algorytmie \ref{alg2}.
+\begin{algorithm}[!t]
+\raggedright
+\caption{Pakowanie plecakowe z heurystyką First Fit Decreasing}
+\label{alg2}
+\textbf{Krok 1.} Posortuj pręty od najdłuższego do najkrótszego. Weź pierwszy pręt.
+\smallskip
+
+\textbf{Krok 2.} Znajdź wzorzec w którym pręt zmieści się.
+\smallskip
+
+\textbf{Krok 3.} Jeżeli taki wzorzec istnieje, umieść tam pręt. Jeżeli takiego wzorca brak, utwórz nowy wzorzec i umieść w nim pręt.
+\smallskip
+
+\textbf{Krok 4.} Weź kolejny pręt i wróć do \textbf{kroku 2.} W przypadku ich braku zakończ algorytm.
+\end{algorithm}
+Ta heurystyka zapewnia znalezienie rozwiązania nie gorszego niż \((11/9*OPT + 6/9)\), gdzie OPT jest rozwiązaniem optymalnym \cite{bin-packing-optimal}, zatem ewentualnie gorszego o nie więcej niż ok. 25\% względem optimum, ale za to o dość niskiej złożoności $O(n) = n * log(n)$.
+
+Kolejna wersja tego algorytmu już uwzględnia relaksację, jednak robi to zachłannie. Jest oparta o ten sam algorytm co poprzednia (BinPack), z tą drobną modyfikacją że poszukując miejsca na dany pręt poszukujemy miejsca dokładnie o tej długości lub mniejszego o maksymalną wartość relaksacji. Porównując więc tą metodę do modelu relaksacji w programowaniu liniowym, nie jesteśmy tutaj w stanie określić minimalnego skrócenia prętu które da wyznaczyć nowy wzorzec. Na przykład biorąc pod uwagę zamówienie \ref{order1} przy użyciu programowania liniowego ustaliliśmy, że wzorzec \(o_{i,5} = |2 \; 2 \; 1 \; 0|\), będzie miał skrócony pręt drugi o \(28{,}5 \, \text{cm}\). W przypadku relaksacji BinPack skrócenie to przyjęłoby maksymalną wartość czyli \(30 \, \text{cm}\).
 
 % Istnieją sposoby rozwiązywania problemu pakowania do pojemników w czasie wielomianowym przy korzystaniu z odpowiednich aproksymacji. Jeden z nich przedstawiony jest w pracy \cite{bin-packing}. Odpowiednio grupując i usuwając pręty docelowe, a następnie rozwiązując zadania programowania liniowego można uzyskać czas wielomianowy (o dużym stopniu, co najmniej ósmym) i rozwiązanie o ilości pojemników co najwyżej wynoszącej $X = OPT + O(log^2(OPT))$ gdzie OPT to rozwiązanie optymalne.
 

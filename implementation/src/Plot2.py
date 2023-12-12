@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 # Read the CSV file
-data = pd.read_csv('output/effi_summary4.csv')
+data = pd.read_csv('output/effi_summary_dense.csv')
 
 # Extract the columns for plotting
 columns_to_plot = ['optimal', 'backpack', 'backpack_relaxed']
@@ -19,9 +19,9 @@ y_ticks_percentage = list(range(0, 25, 5))
 x_ticks = list(range(0, 1001, 50))
 
 
-axis_number_font_size = 15
-subplot_font_size = 20
-plot_font_size = 40
+axis_number_font_size = 20
+subplot_font_size = 25
+plot_font_size = 35
 
 
 fig, (ax1, ax2) = plt.subplots(2, 1, layout='constrained')
@@ -32,8 +32,8 @@ ax1.bar(data['true'] ,data['backpack'], color='green', width=1)
 ax1.spines['left'].set_position('zero')
 ax1.spines['right'].set_color('none')
 ax1.grid(True)
-ax1.set_ylabel('Number of base rods', fontsize=subplot_font_size)
-ax1.set_xlabel('Difference between solution found and optimal', fontsize=subplot_font_size)
+ax1.set_ylabel('Excess of base rods\nover optimal solution', fontsize=subplot_font_size)
+ax1.set_xlabel('Number of base rods in optimal solution', fontsize=subplot_font_size)
 ax1.set_xticks(x_ticks)
 ax1.tick_params(axis='both', which='major', labelsize=axis_number_font_size)
 ax1.tick_params(axis='both', which='minor', labelsize=axis_number_font_size)
@@ -57,9 +57,9 @@ ax2.set_xticks(x_ticks)
 ax2.tick_params(axis='both', which='major', labelsize=axis_number_font_size)
 ax2.tick_params(axis='both', which='minor', labelsize=axis_number_font_size)
 ax2.grid(True)
-ax2.set_ylabel('Overestimation, [%]', fontsize=subplot_font_size)
-ax2.set_xlabel('Percentage difference between solution found and optimal', fontsize=subplot_font_size)
+ax2.set_ylabel('Percentage excess of base rods \nover optimal solution [%]', fontsize=subplot_font_size)
+ax2.set_xlabel('Number of base rods in optimal solution', fontsize=subplot_font_size)
 ax2.set_xlim(0,1000)
 
-fig.suptitle('BinPack algorithm results', fontsize=plot_font_size)
+fig.suptitle('BinPack algorithm efficiency - number of rods exceding optimal solution', fontsize=plot_font_size)
 plt.show()

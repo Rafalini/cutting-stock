@@ -108,6 +108,6 @@ timedata = {
 
 #load data into a DataFrame object:
 df = pd.DataFrame(data)
-df.to_csv(os.path.join(args.output_dir, "effi_summary3.csv"))
+df.to_csv(os.path.join(args.output_dir, "effi_summary_2.csv"))
 df = pd.DataFrame(timedata)
-df.to_csv(os.path.join(args.output_dir, "time_summary3.csv"))
+df.to_csv(os.path.join(args.output_dir, "time_summary_2.csv"))

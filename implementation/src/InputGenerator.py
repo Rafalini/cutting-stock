@@ -9,13 +9,12 @@ import argparse
 parser=argparse.ArgumentParser()
 parser.add_argument("--input-dir", help="Input directory", default="input")
 parser.add_argument("--output-dir", help="Output directory", default="output")
+parser.add_argument("--factory-rod-size", help="Factory base rod length", default=12, type=int)
 parser.add_argument("--samples", help="Samples number", default=10, type=int)
 parser.add_argument("--min-order", help="Min order", default=5, type=int)
-parser.add_argument("--mode", help="Generation mode", choices=["random", "reverse"], default="reverse")
+parser.add_argument("--step", help="Min order + step on every interation", default=10, type=int)
 parser.add_argument("--batch", help="Amount in batch of given size", default=5, type=int)
 args=parser.parse_args()
-
-factor = 3
 
 def clearInputsOutputs():
 
@@ -23,34 +22,13 @@ def clearInputsOutputs():
         os.makedirs(args.input_dir)
     if not os.path.exists(args.output_dir):
         os.makedirs(args.output_dir)
-
     for file in os.listdir(args.input_dir):
         os.remove(os.path.join(args.input_dir, file))
-
     # for file in os.listdir(args.output_dir):
     #     os.remove(os.path.join(args.output_dir,file))
 
 
-def generateData(relaxation=False, max_percentage=50, factory_rod_size=15, order_size=10):
-    order = []
-    while order_size > 0:
-        rod_size = random.randint(1, factory_rod_size - 1)
-        rods_number = random.randint(1, order_size)
-        order_size -= rods_number
-        if order_size < 0:
-            rods_number += order_size
-
-        relaxation_length = random.randint(0, math.ceil(rod_size*max_percentage/100)-1)
-        relaxation_number = random.randint(0, rods_number)
-        if not relaxation:
-            relaxation_length = 0
-            relaxation_number = 0
-
-        order.append({"rod_size": rod_size, "rods_number": rods_number, "relaxation_length": relaxation_length, "relaxation_number": relaxation_number})
-
-    return {"factory_rod_size": factory_rod_size, "order": order}
-
-def reverseGenerator(relaxation=False, max_percentage=50, factory_rod_size=15, order_size=10):
+def reverseGenerator(factory_rod_size, order_size):
     order={}
 
     for _ in range(order_size):
@@ -72,15 +50,29 @@ def reverseGenerator(relaxation=False, max_percentage=50, factory_rod_size=15, o
 
     data = []
     for length, amount in order.items():
-        relaxation_length = 0
-        relaxation_number = 0
-        if length > 2 and relaxation:
-            relaxation_number = random.randint(0, amount-1)
-            relaxation_length = math.ceil(length * random.randint(1, max_percentage)/100)
+        data.append({"rod_size": length, "rods_number": amount, "relaxation_length": 0, "relaxation_number": 0})
 
-        data.append({"rod_size": length, "rods_number": amount, "relaxation_length": relaxation_length, "relaxation_number": relaxation_number})
+    return data
 
-    return {"optimal_solution": order_size, "factory_rod_size": factory_rod_size, "order": data}
+
+def relaxeOrder(factory_rod_size, order):
+    relaxedOrder=[]
+    random.shuffle(order)
+
+    for entry in order:
+
+        relaxation_number = random.randint(0, entry["rods_number"])
+        relaxation_length = random.randint(0, factory_rod_size - entry["rod_size"])
+
+        if relaxation_number == 0 or relaxation_length == 0:
+            relaxedOrder.append({"rod_size": entry["rod_size"], "rods_number": entry["rods_number"], "relaxation_length": 0, "relaxation_number": 0})
+        elif relaxation_number == entry["rods_number"]:    
+            relaxedOrder.append({"rod_size": entry["rod_size"]+relaxation_length, "rods_number": relaxation_number, "relaxation_length": relaxation_length, "relaxation_number": relaxation_number})
+        else:
+            relaxedOrder.append({"rod_size": entry["rod_size"], "rods_number": entry["rods_number"]-relaxation_number, "relaxation_length": 0, "relaxation_number": 0})
+            relaxedOrder.append({"rod_size": entry["rod_size"]+relaxation_length, "rods_number": relaxation_number, "relaxation_length": relaxation_length, "relaxation_number": relaxation_number})
+
+    return relaxedOrder
 
 
 if __name__ == "__main__":
@@ -97,12 +89,10 @@ if __name__ == "__main__":
             data = []
 
             for j in range(args.batch):
-                match args.mode:
-                    case "reverse":
-                        data.append(reverseGenerator(relaxation=True, max_percentage = 20, factory_rod_size = 12, order_size=minOrder + i*factor))
-                        # data.append(reverseGenerator(relaxation=False, max_percentage = 20, factory_rod_size = 12, order_size=minOrder + i*factor))
-                    case "random":
-                        data.append(generateData(relaxation=True, max_percentage = 20, factory_rod_size = 12, order_size=minOrder + i*factor))
-                        # data.append(generateData(relaxation=False, max_percentage = 20, factory_rod_size = 12, order_size=minOrder + i*factor))
+                order_size = minOrder + i*args.step
+                order = reverseGenerator(factory_rod_size = args.factory_rod_size, order_size=order_size)
+                relaxedOrder = relaxeOrder(factory_rod_size=args.factory_rod_size, order=order)
+                data.append({"optimal_solution": order_size, "factory_rod_size": args.factory_rod_size, "order": order, "relaxedOrder": relaxedOrder})
+
 
             outfile.write(json.dumps(data))
