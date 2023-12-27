@@ -28,17 +28,21 @@ Problem główny przedstawia się następująco:
     \forall{i} \! \in \! N\!: \,\, \sum_{j=1}^{M} o_{i,j} p_j >= d_i
 \end{equation}
 
-Podproblem był zaś zdefiniowany następująco:
+W problemie głównym minimalizujemy liczbę użyć poszczególnych wzorców \(p_j\) ze zbioru wszystkich zdefiniowanych wzorców \(M\). Wzorzec określa sposób podziału pręta bazowego na krótsze wymagane odcinki. Innymi słowy więc minimalizujemy liczbę bazowych prętów.
+
+Jedynym ograniczeniem problemu głównego jest wymuszenie spełnienia zamówienia na liczbę \(d_i\) wymaganych typów, gdzie dany typ odcinka rozumiany jest jako odcinek o długości \(w_i\). Ograniczenie to musi być spełnione dla wszystkich typów. Zmienna \(o_{i,j}\) definiuje strukturę wzorca \(p_j\), a dokładnie liczbę prętów o długości \(w_i\) we wzorcu \(p_j\).
+
+Finalnie powstaje podproblem, którego celem jest optymalizacja struktury wzorców. Podproblem jest zdefiniowany następująco:
 \begin{equation}
    \min_x (1 - \sum_{i=1}^{N} c_i x_i )
 \end{equation}
 \begin{equation}
     \sum_{i=1}^{N} w_i x_i <= \sigma
 \end{equation}
-W problemie głównym minimalizujemy liczbę użyć poszczególnych wzorców \(p_j\) ze zbioru wszystkich dostępnych wzorców \(M\). Innymi słowy więc minimalizujemy liczbę bazowych prętów. Jedynym ograniczeniem problemu głównego jest wymuszenie spełnienia zamówienia \(N\) na które składa się ilość wymaganych odcinków prętów \(d_i\) o długościach \(w_i\). Zmienna \(o_{i,j}\) mówi nam o strukturze wzorców \(p_j\), a dokładnie o ilości wystąpień prętów o długości \(w_i\) we wzorcu \(p_j\). 
 
-Podproblem jest typowym modelem problemu plecakowego. Służy nam on do odnalezienia kolejnego optymalnego wzorca. Staramy się w nim zmaksymalizować (we wzorze jest minimalizacja z uwagi na odejmowanie od stałej) cenę nowego wzorca, na którą składają się ceny \(c_i\) i ilość \(x_i\) użytych w nim prętów od długości \(w_i\). Ceną w naszym przypadku jest aktualny koszt inkrementacji ilości zamówionych odcinków \(d_i\) wyrażony w surowych prętach. Tym samym jesteśmy w stanie policzyć cenę rozwiązując problem główny i przypisując poszczególnym odcinkom powiązane z nimi zmienne dualne.
-Pojedyncze ograniczenie zapewnia, że suma użytych elementów nie przekroczy długości prętu bazowego \(\sigma\).
+
+Podproblem jest typowym modelem problemu plecakowego. Służy do odnalezienia kolejnego optymalnego wzorca. Staramy się w nim zmaksymalizować (we wzorze jest minimalizacja z uwagi na odejmowanie od stałej) cenę nowego wzorca, na którą składają się ceny \(c_i\) i ilość \(x_i\) użytych w nim prętów od długości \(w_i\). Ceną w naszym przypadku jest aktualny koszt inkrementacji ilości zamówionych odcinków \(d_i\) wyrażony w surowych prętach. Tym samym jesteśmy w stanie policzyć cenę rozwiązując problem główny i przypisując poszczególnym odcinkom powiązane z nimi zmienne dualne.
+Pojedyncze ograniczenie zapewnia, że suma użytych elementów nie przekroczy długości pręta bazowego \(\sigma\).
 
 Podproblem został poddany kilku zmianom, mającym pozwolić na zastosowanie relaksacji. Finalnie, przedstawia się on następująco:
 \begin{equation}
@@ -121,6 +125,7 @@ którego wartości relaksacji są równe:
     \end{vmatrix}
 \]
 Jak widać, nowo wyznaczony wzorzec już uwzględnia zastosowanie relaksacji. Optymalnym rozwiązaniem okazało się skrócenie prętów \(w_i = 200\text{cm}\) o \(y_i/x_i=28{,}5 \text{cm}\). Ponieważ rozwiązanie podproblemu \ref{podproblemRelaks} dało wynik większy od zera, algorytm jest kontynuowany. Wracamy więc do rozwiązania problemu głównego i wyznaczenia nowych cen już z rozszerzonym zestawem wzorców. Gdy jedno z rozwiązań podproblemu da wynik ujemny, generowanie kolejnych wzorców zostanie zaniechane. Krokiem kończącym jest ostatnie rozwiązanie problemu głównego tym razem jednak w dziedzinie liczb całkowitych.
+[MOZE WARTO POKAZAC DO KONCA ALGORYTM]
 
 \subsection{Implementacje oparte na heurystyce First Fit Decreasing}
 
@@ -143,6 +148,7 @@ Kolejne autorskie rozwiązanie postanowiliśmy oprzeć o algorytm BinPack, któr
 Ta heurystyka zapewnia znalezienie rozwiązania nie gorszego niż \((11/9*OPT + 6/9)\), gdzie OPT jest rozwiązaniem optymalnym \cite{bin-packing-optimal}, zatem ewentualnie gorszego o nie więcej niż ok. 25\% względem optimum, ale za to o dość niskiej złożoności $O(n) = n * log(n)$.
 
 Kolejna wersja tego algorytmu już uwzględnia relaksację, jednak robi to zachłannie. Jest oparta o ten sam algorytm co poprzednia (BinPack), z tą drobną modyfikacją że poszukując miejsca na dany pręt poszukujemy miejsca dokładnie o tej długości lub mniejszego o maksymalną wartość relaksacji. Porównując więc tą metodę do modelu relaksacji w programowaniu liniowym, nie jesteśmy tutaj w stanie określić minimalnego skrócenia prętu które da wyznaczyć nowy wzorzec. Na przykład biorąc pod uwagę zamówienie \ref{order1} przy użyciu programowania liniowego ustaliliśmy, że wzorzec \(o_{i,5} = |2 \; 2 \; 1 \; 0|\), będzie miał skrócony pręt drugi o \(28{,}5 \, \text{cm}\). W przypadku relaksacji BinPack skrócenie to przyjęłoby maksymalną wartość czyli \(30 \, \text{cm}\).
+[MOZNA ZROBIC POTEM KOREKTE - JEZELI NA PRECIE JEST ODPAD TO STARAMY SIE TEN ODPAD ROZDZIELIC ŻEBY ZMNIEJSZYC RELAKSACJE ORAZ EWENTUALNIE ZROBIC PRETY TROCHE DLUŻĘ - RELAKASACJA MOZE DZIALAC W OBIE STRONY - PRZYCZYM WYDLUZANIE MA SENS TYLKO POTO ZEBY NIE CIAC i NIE BYLO ODPADU]
 
 % Istnieją sposoby rozwiązywania problemu pakowania do pojemników w czasie wielomianowym przy korzystaniu z odpowiednich aproksymacji. Jeden z nich przedstawiony jest w pracy \cite{bin-packing}. Odpowiednio grupując i usuwając pręty docelowe, a następnie rozwiązując zadania programowania liniowego można uzyskać czas wielomianowy (o dużym stopniu, co najmniej ósmym) i rozwiązanie o ilości pojemników co najwyżej wynoszącej $X = OPT + O(log^2(OPT))$ gdzie OPT to rozwiązanie optymalne.
 
