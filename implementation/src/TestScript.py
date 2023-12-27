@@ -7,6 +7,29 @@ import os
 import time
 import argparse
 
+fileNames="summary_1"
+
+def save(tru, opt, std, rel, time_opt, time_std, time_rel):
+    data = {
+      "true": tru,
+      "optimal": opt,
+      "backpack": std,
+      "backpack_relaxed" : rel
+    }
+
+    timedata = {
+      "true": tru,
+      "optimal": time_opt,
+      "backpack": time_std,
+      "backpack_relaxed" : time_rel
+    }
+
+    #load data into a DataFrame object:
+    df = pd.DataFrame(data)
+    df.to_csv(os.path.join(args.output_dir, "effi_"+fileNames+".csv"))
+    df = pd.DataFrame(timedata)
+    df.to_csv(os.path.join(args.output_dir, "time_"+fileNames+".csv"))
+
 parser=argparse.ArgumentParser()
 parser.add_argument("--input-dir", help="Input directory", default="input")
 parser.add_argument("--output-dir", help="Output directory", default="output")
@@ -26,6 +49,7 @@ class bcolors:
 
 standardBinPack = BinPack.StandardBinPackSolver()
 optimalCutter = StockCutter.StockCutter() 
+
 tru = []
 opt = []
 std = []
@@ -35,11 +59,30 @@ time_opt = []
 time_std = []
 time_rel = []
 
+beginning = 0
+
+if os.path.exists(os.path.join(args.output_dir, "effi_"+fileNames+".csv")):
+  effiPd = pd.read_csv(os.path.join(args.output_dir, "effi_"+fileNames+".csv"))
+  timePd = pd.read_csv(os.path.join(args.output_dir, "time_"+fileNames+".csv"))
+
+  tru = effiPd['true'].values.tolist()
+  opt = effiPd['optimal'].values.tolist()
+  std = effiPd['backpack'].values.tolist()
+  rel = effiPd['backpack_relaxed'].values.tolist()
+
+  time_opt = timePd['optimal'].values.tolist()
+  time_std = timePd['backpack'].values.tolist()
+  time_rel = timePd['backpack_relaxed'].values.tolist()
+
+  beginning = effiPd['Unnamed: 0'].values[-1]
 
 files = os.listdir(args.input_dir)
 files.sort()
 
 for idx, input in enumerate(files):
+    
+    if idx < beginning:
+       continue
 
     print(bcolors.WARNING + "Progress: " + str(round(100 * (idx+1)/len(os.listdir(args.input_dir)),2))+"%   " + input)
 
@@ -62,22 +105,6 @@ for idx, input in enumerate(files):
     rel.append(sum(tmpRel)/len(tmpRel))
 #Optimal
 
-    # start = time.time()
-    # tmpOpt = []
-    # for jsonData in jsonArr:
-    #   jsonData["fileDir"] = args.output_dir
-    #   name = "optimal_" + input.split(".")[0]
-    #   jsonData["fileName"] = name
-    #   jsonData["saveFigure"] = False
-
-    #   if idx < 23: #above this constraint, standard solver becomes very time consuming
-    #     tmpOpt.append(optimalCutter.solve(jsonData, jsonData["factory_rod_size"]))
-    #   else:  
-    #     tmpOpt.append(jsonData["optimal_solution"])
-
-    # opt.append(sum(tmpOpt)/len(tmpOpt))
-    # time_opt.append("{:.4f}".format((time.time() - start)/len(tmpOpt),5))
-
     ampl = AmplSolver.AmplSolver()
     fileList = ampl.prepareDataFiles(os.path.join(args.input_dir, input))
     tmpOpt = []
@@ -92,22 +119,8 @@ for idx, input in enumerate(files):
 
     tru.append(jsonArr[0]["optimal_solution"])
 
-data = {
-  "true": tru,
-  "optimal": opt,
-  "backpack": std,
-  "backpack_relaxed" : rel
-}
+    if idx % 3 == 0:
+      save(tru, opt, std, rel, time_opt, time_std, time_rel)
 
-timedata = {
-  "true": tru,
-  "optimal": time_opt,
-  "backpack": time_std,
-  "backpack_relaxed" : time_rel
-}
+save(tru, opt, std, rel, time_opt, time_std, time_rel)
 
-#load data into a DataFrame object:
-df = pd.DataFrame(data)
-df.to_csv(os.path.join(args.output_dir, "effi_summary_2.csv"))
-df = pd.DataFrame(timedata)
-df.to_csv(os.path.join(args.output_dir, "time_summary_2.csv"))
