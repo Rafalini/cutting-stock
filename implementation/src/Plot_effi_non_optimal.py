@@ -40,15 +40,13 @@ ax1.tick_params(axis='both', which='minor', labelsize=axis_number_font_size)
 # ax1.set_yticks(fontsize=axis_number_font_size)
 ax1.set_xlim(0,1000)
 
-data['smooth'] = data['binpack_deviation'][:50]
-# data.concat({'smooth':data['binpack_deviation'].rolling(50, closed="right").sum()/50},ignore_index=True)
-
 lim = 10
-
+data['smooth'] = data['binpack_deviation'][:lim]
 data['smooth'] = data['binpack_deviation'].rolling(lim, closed="right").sum()/lim
 data['smooth'][:lim] = data['binpack_deviation'][:lim]
 
 ax2.plot(data['true'], data['smooth'], color='orange')
+# ax2.plot(data['true'], data['binpack_deviation'], color='red')
 
 ax2.spines['left'].set_position('zero')
 ax2.spines['right'].set_color('none')

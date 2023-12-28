@@ -15,12 +15,11 @@ class AmplSolver(AbstractSolver):
             os.makedirs(self.workingDir)
         self.solver = AMPL()
         self.solver.set_output_handler(OutputHandler())
-        self.solver.option['solver'] = 'cplex'
 
     def reset(self):
         self.solver.reset()
 
-    def prepareData(self, inputOrder, outputFile):
+    def prepareData(self, inputOrder, outputFile, key="relaxedOrder"):
 
         with open(outputFile, "w") as outfile:
             outfile.write("""
@@ -98,13 +97,13 @@ param: ORDERS: widths  barsNum  maxRelax :=
         return self.solver.get_objective("Number").value()
     
 
-    def prepareDataFiles(self, inputFile):
+    def prepareDataFiles(self, inputFile, mode):
         data = DataLoader.loadData(inputFile)
 
         fileList = []
         for idx, entry in enumerate(data):
             fileName = os.path.join(self.workingDir, str(idx) + ".dat")
             fileList.append(fileName)
-            self.prepareData(entry, fileName)
+            self.prepareData(entry, fileName, mode)
 
         return fileList

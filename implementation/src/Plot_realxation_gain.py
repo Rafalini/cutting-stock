@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 # Read the CSV file
-data = pd.read_csv('output/effi_summary3.csv')
+data = pd.read_csv('output/effi_summary_relax.csv')
 
 # Extract the columns for plotting
 columns_to_plot = ['optimal', 'backpack', 'backpack_relaxed']
