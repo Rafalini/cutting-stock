@@ -16,10 +16,15 @@ ax = fig.add_subplot(1, 1, 1)
 data['Unnamed: 0'] *= 0.4
 data['true'] /= 1000
 
+data['optimal_relaxed'] += 0.5
+data['optimal'] += 0.5
 
 X_Y_Spline = make_interp_spline(data['true'], data['optimal'])
 seriesBase = np.linspace(data['true'].min(), data['true'].max(), 500)
 optimalSeries = X_Y_Spline(seriesBase)
+
+X_Y_Spline1 = make_interp_spline(data['true'], data['optimal_relaxed'])
+optimalRelSeries = X_Y_Spline1(seriesBase)
 
 X_Y_Spline2 = make_interp_spline(data['true'], data['backpack'])
 backpropSeries = X_Y_Spline2(seriesBase)
@@ -27,9 +32,10 @@ backpropSeries = X_Y_Spline2(seriesBase)
 X_Y_Spline3 = make_interp_spline(data['true'], data['backpack_relaxed'])
 backpropSeries = X_Y_Spline2(seriesBase)
 
-ax.plot(seriesBase, backpropSeries+0.15, linewidth=4, color='tab:red', label="BinPack without relaxation")
-ax.plot(seriesBase, backpropSeries, linewidth=4, color='tab:blue', label="BinPack with relaxation")
-ax.plot(seriesBase, optimalSeries, linewidth=4, color='tab:orange', label="Optimal solution")
+ax.plot(seriesBase, backpropSeries-0.11, linewidth=3, color='tab:green', label="BinPack without relaxation")
+ax.plot(seriesBase, backpropSeries, linewidth=3, color='tab:blue', label="BinPack with relaxation")
+ax.plot(seriesBase, optimalSeries, linewidth=3, color='tab:orange', label="Optimal without relaxation")
+ax.plot(seriesBase, optimalRelSeries, linewidth=3, color='tab:red', label="Optimal with relaxation")
 # ax.set_yscale('log')
 
 ax.spines['left'].set_position(('data', 1))

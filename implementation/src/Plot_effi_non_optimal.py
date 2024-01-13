@@ -59,5 +59,5 @@ ax2.set_ylabel('Percentage excess of base rods \nover optimal solution [%]', fon
 ax2.set_xlabel('Number of base rods in optimal solution', fontsize=subplot_font_size)
 ax2.set_xlim(0,1000)
 
-fig.suptitle('BinPack algorithm efficiency - number of rods exceding optimal solution', fontsize=plot_font_size)
+fig.suptitle('Algorithm efficiency - number of rods exceding true optimal solution', fontsize=plot_font_size)
 plt.show()

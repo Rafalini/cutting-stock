@@ -1,6 +1,8 @@
 from solutions import AmplSolver
+
+
 amp = AmplSolver.AmplSolver()
-amp.solve('ampl_working_dir/0.dat')
+amp.solve('ampl/cut.dat')
 
 def printEntityList(variable_map):
     for entity_name, entity in variable_map:
@@ -14,4 +16,5 @@ ampl = amp.solver
 
 printEntityList(ampl.getVariables())
 printEntityList(ampl.getConstraints())
+# printEntityList(ampl.get_parameter('Wfep'))
 

@@ -7,7 +7,7 @@ import os
 import time
 import argparse
 
-fileNames="test"
+fileNames="cut2"
 
 def save(tru, opt, opt_rel, std, rel, time_opt, time_opt_rel, time_std, time_rel):
     data = {
@@ -63,6 +63,11 @@ time_opt_rel = []
 time_std = []
 time_rel = []
 
+# waste_opt = []
+# waste_opt_rel = []
+# waste_std = []
+# waste_rel = []
+
 beginning = -1
 
 if os.path.exists(os.path.join(args.output_dir, "effi_"+fileNames+".csv")):
@@ -99,9 +104,9 @@ for idx, input in enumerate(files):
     tmpStd = []
     for jsonData in jsonArr:
       tmpStd.append(standardBinPack.solve(jsonData, jsonData["factory_rod_size"], False))
-
     time_std.append("{:.4f}".format((time.time() - start)/len(tmpStd),5))
     std.append(sum(tmpStd)/len(tmpStd))
+
 #Relaxed binpack
     start = time.time()
     tmpRel = []
