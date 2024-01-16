@@ -19,7 +19,7 @@ class AmplSolver(AbstractSolver):
     def reset(self):
         self.solver.reset()
 
-    def prepareData(self, inputOrder, outputFile, key="relaxedOrder"):
+    def prepareData(self, inputOrder, outputFile, key):
 
         with open(outputFile, "w") as outfile:
             outfile.write("""
@@ -30,7 +30,7 @@ param rawBarWidth := """)
 param: ORDERS: widths  barsNum  maxRelax :=
 """)
             i = 1
-            for order in inputOrder["relaxedOrder"]:
+            for order in inputOrder[key]:
                 if order["relaxation_number"] > 0:
                     outfile.write(str(i)+" "+str(order["rod_size"]) +" "+str(order["relaxation_number"]) +" "+ str(order["relaxation_length"])+"\n")
                     i+=1
@@ -104,6 +104,6 @@ param: ORDERS: widths  barsNum  maxRelax :=
         for idx, entry in enumerate(data):
             fileName = os.path.join(self.workingDir, str(idx) + ".dat")
             fileList.append(fileName)
-            self.prepareData(entry, fileName, mode)
+            self.prepareData(entry, fileName, key = mode)
 
         return fileList

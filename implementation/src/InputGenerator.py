@@ -5,6 +5,8 @@ import os, sys
 from unittest import result
 import argparse
 
+maxPercentageRelax=0.2
+maxPercentageAmount=0.2
 
 parser=argparse.ArgumentParser()
 parser.add_argument("--input-dir", help="Input directory", default="input")
@@ -59,15 +61,15 @@ def reverseGenerator(factory_rod_size, order_size):
     return {"data": data, "sumLen":sumLen}
 
 
-def relaxeOrder(factory_rod_size, order):
+def relaxeOrder(order):
     relaxedOrder=[]
     maxRelax = 0
     random.shuffle(order)
 
     for entry in order:
 
-        relaxation_number = random.randint(0, max(1, int(entry["rods_number"]*0.2)))
-        relaxation_length = random.randint(0, factory_rod_size - entry["rod_size"])
+        relaxation_number = random.randint(0, max(1, int(entry["rods_number"]*maxPercentageAmount)))
+        relaxation_length = random.randint(0, max(1, int(entry["rod_size"]*maxPercentageRelax)))
 
         if relaxation_number == 0 or relaxation_length == 0:
             relaxedOrder.append({"rod_size": entry["rod_size"], "rods_number": entry["rods_number"], "relaxation_length": 0, "relaxation_number": 0})
@@ -97,7 +99,7 @@ if __name__ == "__main__":
             for j in range(args.batch):
                 order_size = minOrder + i*args.step
                 order = reverseGenerator(factory_rod_size = args.factory_rod_size, order_size=order_size)
-                relaxedOrder = relaxeOrder(factory_rod_size=args.factory_rod_size, order=order["data"])
+                relaxedOrder = relaxeOrder(order=order["data"])
                 data.append({"optimal_solution": order_size, "factory_rod_size": args.factory_rod_size, "orderSum":order["sumLen"], "maxRelax": relaxedOrder["maxRelax"],"order": order["data"], "relaxedOrder": relaxedOrder["relaxed"]})
 
 
