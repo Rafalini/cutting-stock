@@ -3,10 +3,11 @@ import math
 import random
 import os, sys
 from unittest import result
+import numpy as np
 import argparse
 
 maxPercentageRelax=0.2
-maxPercentageAmount=0.2
+maxPercentageAmount=0.4
 
 parser=argparse.ArgumentParser()
 parser.add_argument("--input-dir", help="Input directory", default="input")
@@ -68,8 +69,19 @@ def relaxeOrder(factory_rod_size, order):
 
     for entry in order:
 
-        relaxation_number = random.randint(0, max(1, int(entry["rods_number"]*maxPercentageAmount)))
+        if np.random.random() > 0.1:
+            # a = entry["rods_number"]*maxPercentageAmount/2
+            # b = entry["rods_number"]*maxPercentageAmount
+            # print("A: "+str(int(a)) + " B: "+str(int(b)))
+            if entry["rods_number"] < 10:
+                relaxation_number = random.randint(0, entry["rods_number"])
+            else:
+                relaxation_number = random.randint(int(entry["rods_number"]*maxPercentageAmount/2), int(entry["rods_number"]*maxPercentageAmount))
+        else:
+            relaxation_number = 0
+
         relaxation_length = random.randint(0, max(1, int(factory_rod_size - entry["rod_size"])))
+
 
         if relaxation_number == 0 or relaxation_length == 0:
             relaxedOrder.append({"rod_size": entry["rod_size"], "rods_number": entry["rods_number"], "relaxation_length": 0, "relaxation_number": 0})
