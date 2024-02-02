@@ -7,35 +7,46 @@ import os
 import time
 import argparse
 
-fileNames="cut2"
+fileNames="_fix_"
 
-def save(tru, opt, opt_rel, std, rel, time_opt, time_opt_rel, time_std, time_rel):
-    data = {
-      "true": tru,
-      "optimal": opt,
-      "optimal_relaxed": opt_rel,
-      "backpack": std,
-      "backpack_relaxed" : rel
-    }
+def save(filename, data, timedata):
+    # data = {
+    #   "true": tru,
+    #   "optimal": opt,
+    #   "optimal_relaxed": opt_rel,
+    #   "backpack": std,
+    #   "backpack_relaxed" : rel
+    # }
 
-    timedata = {
-      "true": tru,
-      "optimal": time_opt,
-      "optimal_relaxed": time_opt_rel,
-      "backpack": time_std,
-      "backpack_relaxed" : time_rel
-    }
+    # timedata = {
+    #   "true": tru,
+    #   "optimal": time_opt,
+    #   "optimal_relaxed": time_opt_rel,
+    #   "backpack": time_std,
+    #   "backpack_relaxed" : time_rel
+    # }
 
     #load data into a DataFrame object:
     df = pd.DataFrame(data)
-    df.to_csv(os.path.join(args.output_dir, "effi_"+fileNames+".csv"))
+    df.to_csv(os.path.join(args.output_dir, "effi"+fileNames+filename+".csv"))
     df = pd.DataFrame(timedata)
-    df.to_csv(os.path.join(args.output_dir, "time_"+fileNames+".csv"))
+    df.to_csv(os.path.join(args.output_dir, "time"+fileNames+filename+".csv"))
 
+def genDict():
+    data = {}
+    data["true"] = []
+    data["optimal"] = []
+    data["optimal_relaxed"] = []
+    data["backpack"] = []
+    return data
+   
 parser=argparse.ArgumentParser()
 parser.add_argument("--input-dir", help="Input directory", default="input")
-parser.add_argument("--output-dir", help="Output directory", default="output")
+parser.add_argument("--output-dir", help="Output directory", default="output_new")
 args=parser.parse_args()
+
+if not os.path.exists(args.output_dir):
+    os.makedirs(args.output_dir)
 
 class bcolors:
     HEADER = '\033[95m'
@@ -52,83 +63,48 @@ class bcolors:
 standardBinPack = BinPack.StandardBinPackSolver()
 optimalCutter = StockCutter.StockCutter() 
 
-tru = []
-opt = []
-opt_rel = []
-std = []
-rel = []
+dataNotExtended = genDict()
+timeNotExtended = genDict()
 
-time_opt = []
-time_opt_rel = []
-time_std = []
-time_rel = []
-
-# waste_opt = []
-# waste_opt_rel = []
-# waste_std = []
-# waste_rel = []
-
-beginning = -1
-
-if os.path.exists(os.path.join(args.output_dir, "effi_"+fileNames+".csv")):
-  print("Files found, loading data...")
-  effiPd = pd.read_csv(os.path.join(args.output_dir, "effi_"+fileNames+".csv"))
-  timePd = pd.read_csv(os.path.join(args.output_dir, "time_"+fileNames+".csv"))
-
-  tru = effiPd['true'].values.tolist()
-  opt = effiPd['optimal'].values.tolist()
-  opt_rel = effiPd['optimal_relaxed'].values.tolist()
-  std = effiPd['backpack'].values.tolist()
-  rel = effiPd['backpack_relaxed'].values.tolist()
-
-  time_opt = timePd['optimal'].values.tolist()
-  time_opt_rel = timePd['optimal_relaxed'].values.tolist()
-  time_std = timePd['backpack'].values.tolist()
-  time_rel = timePd['backpack_relaxed'].values.tolist()
-
-  beginning = effiPd['Unnamed: 0'].values[-1]
+dataExtended = genDict()
+timeExtended = genDict()
 
 files = os.listdir(args.input_dir)
 files.sort()
 ampl = AmplSolver.AmplSolver()
 
-for idx, input in enumerate(files):
-    if idx <= beginning:
-       continue
-
-    print(bcolors.WARNING + "Progress: " + str(round(100 * (idx+1)/len(os.listdir(args.input_dir)),2))+"%   " + input)
-
-    jsonArr = DataLoader.loadData(os.path.join(args.input_dir, input))
-#Standard binpack
+def goBinPackNoRelax(dataArr, timeArr, jsonArr):
     start = time.time()
     tmpStd = []
     for jsonData in jsonArr:
       tmpStd.append(standardBinPack.solve(jsonData, jsonData["factory_rod_size"], False))
-    time_std.append("{:.4f}".format((time.time() - start)/len(tmpStd),5))
-    std.append(sum(tmpStd)/len(tmpStd))
+    timeArr.append("{:.4f}".format((time.time() - start)/len(tmpStd),5))
+    dataArr.append(sum(tmpStd)/len(tmpStd))
 
-#Relaxed binpack
+
+def goBinPackRelax(dataArr, timeArr, jsonArr):
     start = time.time()
-    tmpRel = []
+    tmpStd = []
     for jsonData in jsonArr:
-      tmpRel.append(standardBinPack.solve(jsonData, jsonData["factory_rod_size"], True))
+      tmpStd.append(standardBinPack.solve(jsonData, jsonData["factory_rod_size"], True))
+    timeArr.append("{:.4f}".format((time.time() - start)/len(tmpStd),5))
+    dataArr.append(sum(tmpStd)/len(tmpStd))
 
-    time_rel.append("{:.4f}".format((time.time() - start)/len(tmpRel),5))
-    rel.append(sum(tmpRel)/len(tmpRel))
-#Optimal_non_relax
-    fileList = ampl.prepareDataFiles(os.path.join(args.input_dir, input), "order")
-    tmpOpt = []
-
-    start = time.time()
-    for entry in fileList:
-        ampl.reset()
-        tmpOpt.append(ampl.solve(entry))
-
-    opt.append(sum(tmpOpt)/len(tmpOpt))
-    time_opt.append("{:.4f}".format((time.time() - start)/len(tmpOpt),5))
-#Optimal__relax
+def goCollumnGenNoRelax(dataArr, timeArr, input, orderType):
     ampl.reset()
-    fileList = ampl.prepareDataFiles(os.path.join(args.input_dir, input), "relaxedOrder")
+    fileList = ampl.prepareDataFiles(os.path.join(args.input_dir, input), orderType, False)
+    tmpOpt = []
+
+    start = time.time()
+    for entry in fileList:
+        ampl.reset()
+        tmpOpt.append(ampl.solve(entry))
+    timeArr.append("{:.4f}".format((time.time() - start)/len(tmpOpt),5))
+    dataArr.append(sum(tmpOpt)/len(tmpOpt))
+
+def goCollumnGenRelax(dataArr, timeArr, fileList, orderType):
+    ampl.reset()
+    fileList = ampl.prepareDataFiles(os.path.join(args.input_dir, input), orderType, True)
     tmpOpt = []
 
     start = time.time()
@@ -136,12 +112,29 @@ for idx, input in enumerate(files):
         ampl.reset()
         tmpOpt.append(ampl.solve(entry))
 
-    opt_rel.append(sum(tmpOpt)/len(tmpOpt))
-    time_opt_rel.append("{:.4f}".format((time.time() - start)/len(tmpOpt),5))
+    timeArr.append("{:.4f}".format((time.time() - start)/len(tmpOpt),5))
+    dataArr.append(sum(tmpOpt)/len(tmpOpt))
 
-    tru.append(jsonArr[0]["optimal_solution"])
-    # if idx % 3 == 0:
-    save(tru, opt, opt_rel, std, rel, time_opt, time_opt_rel, time_std, time_rel)
+for idx, input in enumerate(files):
+    print(bcolors.WARNING + "Progress: " + str(round(100 * (idx+1)/len(os.listdir(args.input_dir)),2))+"%   " + input)
 
-save(tru, opt, opt_rel, std, rel, time_opt, time_opt_rel, time_std, time_rel)
+    jsonArr = DataLoader.loadData(os.path.join(args.input_dir, input))
+    dataNotExtended["true"].append(jsonArr[0]["optimal_solution"])
+    timeNotExtended["true"].append(jsonArr[0]["optimal_solution"])
+    dataExtended["true"].append(jsonArr[0]["optimal_solution"])
+    timeExtended["true"].append(jsonArr[0]["optimal_solution"])
 
+    goBinPackNoRelax(dataNotExtended["backpack"], timeNotExtended["backpack"], jsonArr)
+    goCollumnGenNoRelax(dataNotExtended["optimal"], timeNotExtended["optimal"], input, "order")
+    goCollumnGenRelax(dataNotExtended["optimal_relaxed"], timeNotExtended["optimal_relaxed"], input, "order")
+
+    #extendedOrder
+    goBinPackRelax(dataExtended["backpack"], timeExtended["backpack"], jsonArr)
+    goCollumnGenNoRelax(dataExtended["optimal"], timeExtended["optimal"], input, "extendedOrder")
+    goCollumnGenRelax(dataExtended["optimal_relaxed"], timeExtended["optimal_relaxed"], input, "extendedOrder")
+
+    save("no_ext", dataNotExtended, timeNotExtended)
+    save("extend", dataExtended, timeExtended)
+
+save("no_ext", dataNotExtended, timeNotExtended)
+save("extend", dataExtended, timeExtended)

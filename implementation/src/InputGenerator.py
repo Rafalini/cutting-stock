@@ -54,8 +54,8 @@ def reverseGenerator(factory_rod_size, order_size):
 
     data = []
     for length, amount in order.items():
-        # if length-5 > 0:
-        #     length -= 1
+        if length-5 > 0:
+            length -= 1
         data.append({"rod_size": length, "rods_number": amount, "relaxation_length": 0, "relaxation_number": 0})
 
     return {"data": data, "sumLen":sumLen}
@@ -100,7 +100,7 @@ if __name__ == "__main__":
                 order_size = minOrder + i*args.step
                 order = reverseGenerator(factory_rod_size = args.factory_rod_size, order_size=order_size)
                 relaxedOrder = relaxeOrder(factory_rod_size=args.factory_rod_size, order=order["data"])
-                data.append({"optimal_solution": order_size, "factory_rod_size": args.factory_rod_size, "orderSum":order["sumLen"], "maxRelax": relaxedOrder["maxRelax"],"order": order["data"], "relaxedOrder": relaxedOrder["relaxed"]})
+                data.append({"optimal_solution": order_size, "factory_rod_size": args.factory_rod_size, "orderSum":order["sumLen"], "maxRelax": relaxedOrder["maxRelax"],"order": order["data"], "extendedOrder": relaxedOrder["relaxed"]})
 
 
             outfile.write(json.dumps(data))
