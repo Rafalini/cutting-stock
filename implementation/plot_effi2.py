@@ -4,15 +4,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import make_interp_spline
 # Read the CSV file
-data = pd.read_csv('output/effi_accuracy.csv')
+data = pd.read_csv('out/effi_extended.csv')
 
 # Extract the columns for plotting
 columns_to_plot = ['optimal', 'backpack', 'backpack_relaxed']
-
-data['optimal'] -= data['true']
-data['optimal_relaxed'] -= data['true']
-data['backpack'] -= data['true']
-data['backpack_relaxed'] -= data['true']
+M= 0.97
+data['optimal'] -= data['true']*M
+data['optimal_relaxed'] -= data['true']*M
+data['backpack'] -= data['true']*M
+data['backpack_relaxed'] -= data['true']*M
 data['optimal_deviation'] = 100 * data['optimal'] / data['true']
 data['optimal_rel_deviation'] = 100 * data['optimal_relaxed'] / data['true']
 data['binpack_deviation'] = 100 * data['backpack'] / data['true']
@@ -50,7 +50,7 @@ ax1.tick_params(axis='both', which='major', labelsize=axis_number_font_size)
 ax1.tick_params(axis='both', which='minor', labelsize=axis_number_font_size)
 # ax1.set_yticks(fontsize=axis_number_font_size)
 ax1.set_xlim(xmin,xlim)
-ax1.set_ylim(1,1500)
+ax1.set_ylim(1,20000)
 ax1.set_yscale('log')
 
 lim = 5

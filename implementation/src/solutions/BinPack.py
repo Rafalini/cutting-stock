@@ -1,33 +1,24 @@
 from solutions.AbstractSolver import AbstractSolver
 
 class BinPacker(AbstractSolver):
-    def getOrderLengths(self, jsonFile):
+    def getOrderLengths(self, rodList, relaxation):
         lengths = []
         lengths = []
-        for i in jsonFile["order"]:
-            for j in range(i["rods_number"]):
-                lengths.append(i["rod_size"])
+        for i in rodList:
+            if relaxation:
+                shorten = i["rod_size"] - i["relaxation_length"]
+                lengths = lengths + [shorten for _ in range(i["relaxation_number"])]
+                rest = i["rods_number"] - i["relaxation_number"]
+                lengths = lengths + [i["rod_size"]  for _ in range(rest)]
+            else:
+                lengths = lengths + [i["rod_size"] for _ in range(i["rods_number"])]
         return lengths
-
-
-    def getRelaxedOrderLengths(self, jsonFile):
-        lengths = []
-        for i in jsonFile["extendedOrder"]:
-            for j in range(i["relaxation_number"]):
-                lengths.append(i["rod_size"] - i["relaxation_length"])
-            for j in range(i["rods_number"] - i["relaxation_number"]):
-                lengths.append(i["rod_size"])
-        return lengths
-
 
 class StandardBinPackSolver(BinPacker):
 
-    def solve(self, inputJsonDict, factoryRodSize=12, relaxation=False):
+    def solve(self, rodList, factoryRodSize, relaxation):
         res = 0
-        if relaxation:
-            inputRods = self.getRelaxedOrderLengths(inputJsonDict)
-        else:
-            inputRods = self.getOrderLengths(inputJsonDict)
+        inputRods = self.getOrderLengths(rodList, relaxation)
 
         # Create an array to store remaining space in bins
         bin_rem = [0] * len(inputRods)

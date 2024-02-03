@@ -3,11 +3,11 @@ from solutions import BinPack
 from solutions import StockCutter
 from solutions import AmplSolver
 import DataLoader
-import os
+import os, glob
 import time
 import argparse
 
-fileNames="_fix_"
+fileNames=""
 
 def save(filename, data, timedata):
     # data = {
@@ -38,11 +38,12 @@ def genDict():
     data["optimal"] = []
     data["optimal_relaxed"] = []
     data["backpack"] = []
+    data["backpack_relaxed"] = []
     return data
    
 parser=argparse.ArgumentParser()
 parser.add_argument("--input-dir", help="Input directory", default="input")
-parser.add_argument("--output-dir", help="Output directory", default="output_new")
+parser.add_argument("--output-dir", help="Output directory", default="input")
 args=parser.parse_args()
 
 if not os.path.exists(args.output_dir):
@@ -70,23 +71,24 @@ dataExtended = genDict()
 timeExtended = genDict()
 
 files = os.listdir(args.input_dir)
+files = [s for s in files if s.endswith('.json')]
 files.sort()
 ampl = AmplSolver.AmplSolver()
 
-def goBinPackNoRelax(dataArr, timeArr, jsonArr):
+def goBinPackNoRelax(dataArr, timeArr, jsonArr, orderType):
     start = time.time()
     tmpStd = []
     for jsonData in jsonArr:
-      tmpStd.append(standardBinPack.solve(jsonData, jsonData["factory_rod_size"], False))
+      tmpStd.append(standardBinPack.solve(jsonData[orderType], jsonData["factory_rod_size"], False))
     timeArr.append("{:.4f}".format((time.time() - start)/len(tmpStd),5))
     dataArr.append(sum(tmpStd)/len(tmpStd))
 
 
-def goBinPackRelax(dataArr, timeArr, jsonArr):
+def goBinPackRelax(dataArr, timeArr, jsonArr, orderType):
     start = time.time()
     tmpStd = []
     for jsonData in jsonArr:
-      tmpStd.append(standardBinPack.solve(jsonData, jsonData["factory_rod_size"], True))
+      tmpStd.append(standardBinPack.solve(jsonData[orderType], jsonData["factory_rod_size"], True))
     timeArr.append("{:.4f}".format((time.time() - start)/len(tmpStd),5))
     dataArr.append(sum(tmpStd)/len(tmpStd))
 
@@ -124,17 +126,19 @@ for idx, input in enumerate(files):
     dataExtended["true"].append(jsonArr[0]["optimal_solution"])
     timeExtended["true"].append(jsonArr[0]["optimal_solution"])
 
-    goBinPackNoRelax(dataNotExtended["backpack"], timeNotExtended["backpack"], jsonArr)
+    goBinPackNoRelax(dataNotExtended["backpack"], timeNotExtended["backpack"], jsonArr, "order")
+    goBinPackRelax(dataNotExtended["backpack_relaxed"], timeNotExtended["backpack_relaxed"], jsonArr, "order")
     goCollumnGenNoRelax(dataNotExtended["optimal"], timeNotExtended["optimal"], input, "order")
     goCollumnGenRelax(dataNotExtended["optimal_relaxed"], timeNotExtended["optimal_relaxed"], input, "order")
 
     #extendedOrder
-    goBinPackRelax(dataExtended["backpack"], timeExtended["backpack"], jsonArr)
+    goBinPackNoRelax(dataExtended["backpack"], timeExtended["backpack"], jsonArr, "extendedOrder")
+    goBinPackRelax(dataExtended["backpack_relaxed"], timeExtended["backpack_relaxed"], jsonArr, "extendedOrder")
     goCollumnGenNoRelax(dataExtended["optimal"], timeExtended["optimal"], input, "extendedOrder")
     goCollumnGenRelax(dataExtended["optimal_relaxed"], timeExtended["optimal_relaxed"], input, "extendedOrder")
 
-    save("no_ext", dataNotExtended, timeNotExtended)
-    save("extend", dataExtended, timeExtended)
+    save("_no_ext", dataNotExtended, timeNotExtended)
+    save("_extend", dataExtended, timeExtended)
 
-save("no_ext", dataNotExtended, timeNotExtended)
-save("extend", dataExtended, timeExtended)
+save("_no_ext", dataNotExtended, timeNotExtended)
+save("_extend", dataExtended, timeExtended)

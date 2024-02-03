@@ -55,8 +55,6 @@ def reverseGenerator(factory_rod_size, order_size):
 
     data = []
     for length, amount in order.items():
-        if length-5 > 0:
-            length -= 1
         data.append({"rod_size": length, "rods_number": amount, "relaxation_length": 0, "relaxation_number": 0})
 
     return {"data": data, "sumLen":sumLen}
