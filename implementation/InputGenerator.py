@@ -1,14 +1,14 @@
 import json
 import math
 import random
-import os, sys
+import os, sys, shutil
 from unittest import result
 import numpy as np
 import argparse
 
 maxPercentageRelax=0.2
-maxPercentageAmount=0.4
-
+maxPercentageAmount=0.2
+tmp_dir = "tmp_data"
 parser=argparse.ArgumentParser()
 parser.add_argument("--input-dir", help="Input directory", default="input")
 parser.add_argument("--output-dir", help="Output directory", default="output")
@@ -27,6 +27,8 @@ def clearInputsOutputs():
         os.makedirs(args.output_dir)
     for file in os.listdir(args.input_dir):
         os.remove(os.path.join(args.input_dir, file))
+    os.makedirs(tmp_dir, exist_ok=True)
+    shutil.rmtree(tmp_dir)
     # for file in os.listdir(args.output_dir):
     #     os.remove(os.path.join(args.output_dir,file))
 
@@ -67,18 +69,18 @@ def relaxeOrder(factory_rod_size, order):
 
     for entry in order:
 
-        if np.random.random() > 0.1:
+        if entry["rods_number"] > 1 and np.random.random() > 0.4:
             # a = entry["rods_number"]*maxPercentageAmount/2
             # b = entry["rods_number"]*maxPercentageAmount
             # print("A: "+str(int(a)) + " B: "+str(int(b)))
             if entry["rods_number"] < 10:
-                relaxation_number = random.randint(0, entry["rods_number"])
+                relaxation_number = random.randint(1, min(1,entry["rods_number"]-1))
             else:
                 relaxation_number = random.randint(int(entry["rods_number"]*maxPercentageAmount/2), int(entry["rods_number"]*maxPercentageAmount))
         else:
             relaxation_number = 0
 
-        relaxation_length = random.randint(0, max(1, int(factory_rod_size - entry["rod_size"])))
+        relaxation_length = random.randint(0, max(0, int(factory_rod_size - 1 - entry["rod_size"])))
 
 
         if relaxation_number == 0 or relaxation_length == 0:
