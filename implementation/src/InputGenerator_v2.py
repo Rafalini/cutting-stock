@@ -6,16 +6,18 @@ from unittest import result
 import argparse
 
 maxPercentageRelax=0.2
-maxPercentageAmount=0.2
+maxPercentageAmount=0.5
 
 parser=argparse.ArgumentParser()
 parser.add_argument("--input-dir", help="Input directory", default="input")
 parser.add_argument("--output-dir", help="Output directory", default="output")
-parser.add_argument("--factory-rod-size", help="Factory base rod length", default=12, type=int)
-parser.add_argument("--samples", help="Samples number", default=10, type=int)
-parser.add_argument("--min-order", help="Min order", default=5, type=int)
-parser.add_argument("--step", help="Min order + step on every interation", default=10, type=int)
-parser.add_argument("--batch", help="Amount in batch of given size", default=1, type=int)
+parser.add_argument("--factory-rod-size", help="Factory base rod length", default=1200, type=int)
+parser.add_argument("--widths-gap", help="Minimal difference in lengths between generated widths", default=50, type=int)
+parser.add_argument("--samples", help="Samples number", default=20, type=int)
+parser.add_argument("--min-order", help="Min order", default=500, type=int)
+parser.add_argument("--step", help="Min order + step on every interation", default=250, type=int)
+parser.add_argument("--batch", help="Amount in batch of given size", default=10, type=int)
+parser.add_argument("--increase-length", help="Should widhts be increased during relaxation", default=0, type=int)
 args=parser.parse_args()
 
 def clearInputsOutputs():
@@ -38,8 +40,9 @@ def reverseGenerator(factory_rod_size, order_size):
         remaining_length = factory_rod_size
 
         while remaining_length > 0:
-            # Generate a random number between 1 and the remaining sum
-            random_num = random.randint(1, remaining_length)
+            # Generate a random number between 0 and the remaining sum and ceil it to widths_gap
+            random_num = random.randint(0, remaining_length - 1)
+            random_num += args.widths_gap - (random_num % args.widths_gap)
             
                 # If the remaining sum is greater than the random number, append the random number
             if remaining_length > random_num:
@@ -75,15 +78,19 @@ def relaxeOrder(factory_rod_size, order):
             relax_range = factory_rod_size - entry["rod_size"];
         
         relaxation_length = random.randint(0, int(relax_range));
+        if args.increase_length:
+            length_increase = relaxation_length
+        else:
+            length_increase = 0
 
         if relaxation_number == 0 or relaxation_length == 0:
             relaxedOrder.append({"rod_size": entry["rod_size"], "rods_number": entry["rods_number"], "relaxation_length": 0, "relaxation_number": 0})
         elif relaxation_number == entry["rods_number"]:    
-            relaxedOrder.append({"rod_size": entry["rod_size"]+relaxation_length, "rods_number": relaxation_number, "relaxation_length": relaxation_length, "relaxation_number": relaxation_number})
+            relaxedOrder.append({"rod_size": entry["rod_size"]+length_increase, "rods_number": relaxation_number, "relaxation_length": relaxation_length, "relaxation_number": relaxation_number})
             maxRelax += relaxation_length * relaxation_number
         else:
             relaxedOrder.append({"rod_size": entry["rod_size"], "rods_number": entry["rods_number"]-relaxation_number, "relaxation_length": 0, "relaxation_number": 0})
-            relaxedOrder.append({"rod_size": entry["rod_size"]+relaxation_length, "rods_number": relaxation_number, "relaxation_length": relaxation_length, "relaxation_number": relaxation_number})
+            relaxedOrder.append({"rod_size": entry["rod_size"]+length_increase, "rods_number": relaxation_number, "relaxation_length": relaxation_length, "relaxation_number": relaxation_number})
             maxRelax += relaxation_length * relaxation_number
     return {"relaxed":relaxedOrder, "maxRelax":maxRelax}
 
@@ -91,12 +98,9 @@ def relaxeOrder(factory_rod_size, order):
 if __name__ == "__main__":
     clearInputsOutputs()
 
-    minOrder = 1
+    minOrder = args.min_order
 
-    if len(sys.argv) == 3:
-        minOrder = args.min_order
-
-    for i in range(1, args.samples+1):
+    for i in range(0, args.samples):
         name = f"{'out_'}{i:04}" + ".json"
         with open(os.path.join(args.input_dir, name), "w") as outfile:
             data = []
