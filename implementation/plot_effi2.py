@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import make_interp_spline
 # Read the CSV file
-data = pd.read_csv('out/effi_extended.csv')
+data = pd.read_csv('output/effi_extend.csv')
 
 # Extract the columns for plotting
 columns_to_plot = ['optimal', 'backpack', 'backpack_relaxed']
@@ -54,9 +54,9 @@ ax1.set_ylim(1,20000)
 ax1.set_yscale('log')
 
 lim = 5
-data['smooth'] = data['binpack_deviation'][:lim]
-data['smooth'] = data['binpack_deviation'].rolling(lim, closed="right").sum()/lim
-data['smooth'][:lim] = data['binpack_deviation'][:lim]
+# data['smooth'] = data['binpack_deviation'][:lim]
+data['smooth'] = data['binpack_deviation'].rolling(lim, closed="both").sum()/lim
+# data['smooth'][:lim] = data['binpack_deviation'][:lim]
 
 optimal_opt_spline = make_interp_spline(data['true'], data['optimal_deviation'])
 optimal_rel_spline = make_interp_spline(data['true'], data['optimal_rel_deviation'])

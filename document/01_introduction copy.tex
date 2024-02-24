@@ -1,0 +1,33 @@
+In the era of ubiquitous digitalization, industry 4.0 [lit], where the basis is information, more and more attention is paid to savings, mainly in the field of optimization of production processes. The problem of cutting steel is the problem of optimal use of material to carry out a production task - the goal is to minimize the costs of order fulfillment. This problem belongs to the class of operations research [lit] and resource utilization problems - e.g., the problem of cutting standard-sized warehouse materials, such as paper rolls or sheet metal, into pieces of specified sizes while minimizing wasted materials. A similar problem is packing parcels on a pallet [lit], where the goal is to use as much space as possible and at the same time minimize empty space. These are problems encountered in industrial applications that can be formulated as a mathematical optimization problem. Such tasks have high computational complexity (they are NP-complete problems), are generally classified as a knapsack problem and are very well described in the literature [lit].
+
+Not all industrial problems fully fit into the pure formula of the backpack problem. In this article, the authors focus on the problem of preparing reinforcement structures used in the construction of houses and other architectural structures. The reinforcement is made of bars of various lengths and diameters specified in the structural design. The bars are prepared from 12-meter bars, which are cut into the shorter required lengths. The difference from the basic knapsack problem is that:
+\begin{itemize}
+\item elements can be made with a certain tolerance - that is, the constraints are not rigid;
+\item the project defines all the elements, but for logistical and storage reasons, the order is usually completed in stages - the problem arises which elements from later stages should be implemented within this stage so that the use of the material is most effective with the smallest inventory.
+\end{itemize}
+
+The problem formulated in this way is applicable to real projects, where the costs of materials, investment management costs, logistics and storage translate into the costs of the entire investment. The problem can be considered in many aspects. In this work, the authors focus on the first of the above-mentioned modifications, which involves allowing relaxation of the dimensions of the bars.
+
+In general, the subject of the study are algorithms for determining the method of dividing base bars into shorter sections. The authors assume that the base bars are produced in a fixed size (12 m) and require dividing into a specific number of shorter length sections according to the design. There can be many sections into which the 12-meter base bar will be divided (many of a given length and many of different lengths) - the general idea is illustrated in the drawing\ref{fig:concept}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\linewidth]{images/concept.png}
+    \caption{Example of stock division}
+    \label{fig:concept}
+\end{figure}
+
+The figure shows that to complete an order consisting of:
+\begin{itemize}
+\item 3 rods of length 6 m;
+\item 3 rods of length 2 m;
+\item 3 rods of length 4 m
+\end{itemize}
+wchich can be sattisfied with order od 3 base (12m) rods.
+
+The tested version of the problem was extended to include the possibility of relaxing the constraints, i.e. relaxing the dimensions requirements. To clarify, let us consider the case of building a house, which requires a strictly defined number of rods of different lengths. However, not all of them have to be exactly the length assumed in the design - transverse bars used to reinforce foundations or stairs can be 3\% shorter. The bars included in the construction of lintels or structural columns can usually be several centimeters shorter or longer. This means that there are elements that have a defined nominal dimension, but a tolerance is allowed. This fact allows in some cases to achieve material savings practically without deterioration of the strength parameters of the structure. This modification affects the form of the task to be solved and is the subject of this article.
+
+
+
+
+

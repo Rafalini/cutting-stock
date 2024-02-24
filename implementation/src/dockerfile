@@ -7,4 +7,4 @@ COPY . .
 RUN pip install --no-cache-dir -r requirements.txt --break-system-packages
 RUN python -m amplpy.modules install highs cbc gurobi
 
-CMD ["python", "-W ignore -u", "TestScript.py"]
+CMD ["python", "-u", "TestScript.py"]

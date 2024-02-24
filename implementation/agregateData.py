@@ -3,7 +3,7 @@ import pandas as pd
 
 filelist = ["effi_extend.csv", "effi_no_ext.csv", "time_extend.csv", "time_no_ext.csv"]
 tmp_dir = "tmp_data"
-out_dir = "out5"
+out_dir = "output"
 
 os.makedirs(out_dir, exist_ok=True)
 

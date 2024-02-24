@@ -1,0 +1,60 @@
+W ramach badań w tej pracy porównujemy 4 wersje algorytmów:
+
+\begin{itemize}
+    \item BinPack, bez relaksacji, wykorzystujący heurystykę "First-Fit"
+    \item BinPack z naiwną relaksacją, heurystyka "First-Fit"
+    \item Rozwiązanie problemu programowania liniowego - \cite{linear-programming-gilmore} - nieuwzględniający relaksacji
+    \item Rozwiązanie problemu programowania liniowego metodą generacji kolumn uwzględniające relaksację
+\end{itemize}
+
+Poprzez określenie "naiwna relaksacja" mamy na myśli podejście, w którym jeśli można skrócić jakiś pręt - to go skracamy, w przypadku nienaiwnym skracamy tylko jeśli poprawi to globalne rozwiązanie - zmniejszy ilość bazowych prętów potrzebnych do wykonania zamówienia. Implementacje i pomiary zostały wykonane z wykorzystaniem pythona. Do implementacji rozwiązania opartego o bazową postać PPL \cite{linear-programming-gilmore} wykorzystaliśmy bibliotekę \href{https://developers.google.com/optimization/introduction/python}{OR-Tools} - która udostępnia zestaw metod do skonstruowania i rozwiązania PPL oraz wykorzystaliśmy bibliotekę \href{https://amplpy.ampl.com/en/latest/}{amplpy}, która dostarcza API do \href{https://ampl.com/}{AMPLa}.
+
+Do testowania napisany został skrypt, który dla zadanej ilości prętów bazowych, dzieli je na mniejsze i na tej podstawie kompletuje zamówienie - stąd z góry znamy optymalne rozwiązanie dla każdego generowanego problemu.
+
+\begin{figure*}[!ht]
+    \begin{center}
+        \includegraphics[width=1\linewidth]{images/optimum-new.png}
+    \end{center}
+    \caption{Quality of BinPack algorithm, excess over optimal solution}
+    \label{fig:optimum}
+\end{figure*}
+
+\FloatBarrier %force figure at this place - block pushing it to next page
+
+ Wykres \ref{fig:optimum} przedstawia wyniki działania algorytmu BinPack oraz algorytmu generacji kolumn bez relaksacji. Dla 500 przypadków testowych, o wielkości od 500 do 20 000 prętów bazowych dla rozwiązania optymalnego, wygenerowaliśmy po 5 alternatywnych zamówień i uśrednialiśmy dla nich wynik. Na górnej części wykresu zaprezentowana jest różnica między optymalnym rozwiązaniem, a tym uzyskanym za pomocą algorytmu binPack oraz metodą generacji kolumn. Ponieważ binPack jest algorytmem korzystającym z heurystyki, zaś problem liniowy rozwiązywany jest w dziedzinie liczb rzeczywistych, to nie oczekujemy ,że któremukolwiek uda znaleźć się rozwiązanie optymalne. Na wykresie ilustrujemy jak dużą nadwyżkę generuje zastosowanie obydu algorytmów. Wielkość nadwyżki jaką generował BinPack, oscylowała w okolicy 10\% dla zamówień o znacznej wielkości, w przypadku metody generacji kolumn były to pojedyncze sztuki (o 3-5 sztuki powyżej spodziewanego rozwiązania optymalnego) \ref{fig:optimum}. Dla małych problemów (poniżej 500 prętów bazowych) algorytm generuje rozwiązanie optymalne, przy większych problemach zwiększa się niedokładność.
+ 
+ Obie implementacje rozwiązujące problem programowania liniowego - wykorzystująca OR-Tools i AMPL'a, generowały rozwiązanie optymalne, jednak rozwiązanie wykorzystujące OR-Tools okazało się wyjątkowo mało wydajne. Już problemy składające się z 20 prętów stanowiły duże wyzwanie obliczeniowe i rozwiązanie pojedynczego problemu trwało od minuty do paru minut, zatem to rozwiązanie zostało zmarginalizowane w ostatecznych wynikach i jedynie tutaj o nim wspominamy, ponieważ przeprowadzenie eksperymentów i pomiarów zajęłoby zbyt długo.
+
+W przypadku uwzględnienia relaksacji generowanie przypadków testowych wykonujemy w podobny sposób. Mianowicie dla zadanej liczby prętów bazowych dzielimy je na mniejsze, tak jak w poprzednim przypadku otrzymujemy jakieś zamówienie o znanym optymalnym rozwiązani ale następnie część z tych prętów wydłużamy - tak by łączna długość prętów była większa niż suma długości zadanych prętów bazowych z których. Dla takiego zamówienia, optimum bez uwzględnienia relaksacji będzie inne, jednak przy jej zastosowaniu powinniśmy otrzymać dokładnie taki schemat cięcia, który otrzymaliśmy przy kompletowaniu zamówienia. Weryfikacja tego, czy w proponowanym rozwiązaniu jest zastosowana minimalna relaksacja polega na drobnym zwiększeniu relaksacji dla jednego z prętów - tak aby zapewnić powstanie odpadku w przypadku naiwnego zastosowania całej dostępnej relaksacji, które nie powinno mieć miejsca w rozwiązaniu optymalnym.
+
+W generowanych przypadkach ilość prętów, które mogły być zrelaksowane i długość relaksacji były losowane z rozkładu \href{https://docs.python.org/3/library/random.html}{jednostajnego} - który domyślnie zapewnia biblioteka \textit{random}. Założyliśmy że ilość prętów które mogą zostać skrócone powinna oscylować wokół 10\% (dla rozkładu jednostajnego oznacza to losowanie wartości skrócenia prętu z zakresu od 1 do 19), a długość relaksacji nie powinna przekraczać 20\% (dla rozkładu jednorodnego skutkuje to wartością oczekiwaną równą 10,5\%, a zaimplementowane jako losowanie z zakresu od 1 do 20). Okazało się że dla większych zamówień przy tych założeniach ilość zaoszczędzonych prętów bazowych dąży do około 8\% rozwiązania optymalnego nie uwzględniającego relaksacji \ref{fig:relaxation-effect}. Kolejnym aspektem względem którego porównywaliśmy algorytmy był czas wykonania. Tutaj spodziewaliśmy się że algorytmy oparte o binPack będą działać relatywnie szybko, a ich złożoność obliczeniowa będzie mieć charakterystykę raczej liniową.
+
+\begin{figure*}[!ht]
+    \begin{center}
+        \includegraphics[width=1\linewidth]{images/relaxation-effect.png}
+    \end{center}
+    \caption{Relaxation effect on optimal solution}
+    \label{fig:relaxation-effect}
+\end{figure*}
+
+\FloatBarrier %force figure at this place - block pushing it to next page
+
+Wydajność algorytmów była testowana dla przypadków od 10 do 1000 prętów bazowych, dla kolejnych przypadków było generowane po 10 alternatywnych zamówień i mierzony był średni czas z rozwiązywania tych 10 przypadków \ref{fig:effi}. Okazuje się że rozwiązanie wykorzystujące implementację w AMPLu zachowuje się mało stabilnie, czas przeliczania przykładu waha się od kilku do 10 sekund i co ciekawe o ile czas rozwiązywania problemu algorytmem BinPack stopniowo rośnie, to AMPL utrzymuje w miarę stały średni czas na poziomie ok. 5 sekund.
+
+\begin{figure*}[!ht]
+    \begin{center}
+        \includegraphics[width=1\linewidth]{images/relaxation-effect.png}
+    \end{center}
+    \caption{Relaxation effect on optimal solution}
+    \label{fig:relaxation-effect}
+\end{figure*}
+
+\begin{figure*}
+    \begin{center}
+        \includegraphics[width=1\linewidth]{images/effi.png}
+    \end{center}
+    \caption{Time efficiency of BinPack and AMPL algorithms}
+    \label{fig:effi}
+\end{figure*}
+
+\FloatBarrier %force figure at this place - block pushing it to next page

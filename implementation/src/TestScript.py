@@ -6,7 +6,9 @@ import DataLoader
 import os, glob
 import time
 import argparse
+# import warnings
 
+# warnings.filterwarnings("ignore", category=DeprecationWarning) 
 fileNames=""
 
 def save(filename, data, timedata):
@@ -118,7 +120,7 @@ def goCollumnGenRelax(dataArr, timeArr, fileList, orderType):
     dataArr.append(sum(tmpOpt)/len(tmpOpt))
 
 for idx, input in enumerate(files):
-    print(bcolors.WARNING + "Progress: " + str(round(100 * (idx+1)/len(os.listdir(args.input_dir)),2))+"%   " + input)
+    print(bcolors.WARNING + "Progress: " + str(round(100 * (idx+1)/len(files),2))+"%   " + input)
 
     jsonArr = DataLoader.loadData(os.path.join(args.input_dir, input))
     dataNotExtended["true"].append(jsonArr[0]["optimal_solution"])

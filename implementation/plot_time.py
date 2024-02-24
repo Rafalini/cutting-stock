@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import make_interp_spline
 
 
-data = pd.read_csv('out/time_no_extended.csv')
+data = pd.read_csv('output/time_no_ext.csv')
 #FONT SIZES
 axis_number_font_size = 20
 subplot_font_size = 25

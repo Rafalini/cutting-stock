@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.interpolate import make_interp_spline
 # Read the CSV file
-data = pd.read_csv('out/effi_no_extended.csv')
+data = pd.read_csv('output/effi_no_ext.csv')
 
 # Extract the columns for plotting
 columns_to_plot = ['optimal', 'backpack', 'backpack_relaxed']
