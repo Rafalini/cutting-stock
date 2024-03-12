@@ -23,3 +23,13 @@ Contents:
 
 
 https://portal.ampl.com/user/ampl/request/amplce/trial/new?_gl=1*10xsaeb*_ga*MTYxNzI3MjcyMi4xNzAxMTEwNDM0*_ga_FY84K2YRRE*MTcwMTExMDQzNC4xLjEuMTcwMTExMjA0Ny4wLjAuMA..*_ga_4VDR4EE10D*MTcwMTExMDQzNC4xLjEuMTcwMTExMjA0Ny4wLjAuMA..*_ga_5XGP9PZL8L*MTcwMTExMDQzNC4xLjEuMTcwMTExMjA0Ny4wLjAuMA..*_gcl_au*MjM3NDI0NzE0LjE3MDExMTA0MzQ.
+
+
+##How To Run?
+1. run InputGenerator
+2. run runDockers.py
+3. run agregateData.py
+
+
+### Gen data command
+python InputGenerator.py --factory-rod-size 120 --min-order 250 --step 250 --samples 80 --batch 10
